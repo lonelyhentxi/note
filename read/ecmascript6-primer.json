@@ -1,0 +1,12 @@
+{
+    "name":"ECMAScript 6 Primer",
+    "label":"ES6 标准入门",
+    "cover":"./ecmascript6-primer.jpg",
+    "links":{
+        "origin":"http://es6.ruanyifeng.com/",
+        "douban":"https://book.douban.com/subject/27127030/"
+    },
+    "storage":{
+        "location":""
+    }
+}
