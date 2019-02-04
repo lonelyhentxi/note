@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="utf-8">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="id=edge">
+    <!--记录兼容ie什么版本-->
+    <title>Document</title>
+</head>
+
+<body>
+    <h1>前端新手村</h1>
+    <h2>从空白页开始</h2>
+    <p>
+        <ul>
+            <li><code>charset meta</code> 决定字符集</li>
+            <li><code>viewport meta</code> 决定使用物理还是逻辑分辨率解析</li>
+            <li><code>http-equiv</code> 决定对IE的兼容等级</li>
+        </ul>
+    </p>
+    <h2>从设计载体到 <code>RWD</code> 显示原理</h2>
+    <h3>平面设计师的观点</h3>
+    <p>
+        <ul>
+            <li>熟悉绝对单位：<code>pt</code>/<code>cm</code>/<code>m</code>/<code>inch</code></li>
+            <li>对齐：靠左、靠右、置中以及靠某条线对齐</li>
+            <li>比例分配：比例尺寸</li>
+        </ul>
+    </p>
+    <h3>浏览器的渲染分辨率</h3>
+    <p>
+        目的：在排版上使用低分辨率，在内容呈现上，使用高分辨率
+    </p>
+    <h2>HTML的作用</h2>
+    <h3>TagName</h3>
+    <p>决定该数据的类型，默认的渲染方式</p>
+    <h3>AttributeName</h3>
+    <p>
+        <ul>
+            <li>Global Attribute: 可以加在任意 tag 的 attribute</li>
+            <li>HTML Event Attribute：允许 tag 可以触发 js 的 event</li>
+        </ul>
+    </p>
+    <h2>语义化标签</h2>
+    <p>
+        <ul>
+            <li>早期，多使用 &lt;div&gt; 标签</li>
+            <li>建议在条件允许的情况下使用语义化标签</li>
+        </ul>
+    </p>
+    <h2>CSS 的单位</h2>
+    <h3>绝对单位</h3>
+    <p>
+        <ul>
+            <li>pt：磅, 1/72 inch</li>
+            <li>pica: 派卡, 1/6 inch</li>
+        </ul>
+    </p>
+    <h3>相对单位</h3>
+    <ul>
+        <li>px：像素，相对于显示设备</li>
+        <li>ex: 相对于当下 <code>font-size</code> 字母的高</li>
+        <li>em: 相对于当下 <code>font-size</code> 字母的宽</li>
+        <li>rem: 相对于浏览器设定字体的 em，等同于&lt;boy&gt; 的 em</li>
+        <li>vh: 相对浏览器可视区域的高度的 1/100</li>
+        <li>vw: 相对浏览器可视区域的宽度的 1/100</li>
+        <li>vmax：可视区域长边</li>
+        <li>vmin: 可视区域短边</li>
+        <li>%：相对基准，用在不同的 css property，有不同的 100%
+            <ul>
+                <li>padding: 父容器宽度</li>
+                <li>margin: 父容器宽度</li>
+                <li>width: 父容器宽度</li>
+                <li>height: 父容器高度</li>
+            </ul>
+        </li>
+    </ul>
+    <h3>对于字体转换的建议</h3>
+    <ul>
+        <li>使用px可以保持美感加上一定的精度</li>
+        <li>单纯使用字体时，em 和 rem 可能有更好的效果</li>
+        <li>&lt;body&gt; 上不设置大小，而使用浏览器预设大小</li>
+        <li><code>@media(print)</code> 设定的css，可以使用pt这种印刷单位</li>
+    </ul>
+    <h3>其他的一些建议</h3>
+    <p>字间距使用 em，行高使用 ex</p>
+    <h2>CSS Cascade 串联/层叠</h2>
+    <p>Cascade 由 Specificity 和 Ruleset order 决定 </p>
+    <h3>Specificity</h3>
+    <p>
+        使用<code>(a,b,c,d)</code>的元组来计算，其中:
+        <ul>
+            <li>a 直接写在 HTML element 上的 style</li>
+            <li>b 出现 id 选择器的次数</li>
+            <li>c 出现 class 选择器的次数，出现 [attribute=value] 形式属性选择器的次数，出现伪类选择器的 :pesudoclasses</li>
+            <li>d 出现 :sudoelements，tagname 类型选择器的次数</li>
+        </ul>
+    </p>
+    <h3>计算 </h3>
+</body>
+
+</html>
