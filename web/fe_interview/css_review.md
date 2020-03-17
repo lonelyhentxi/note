@@ -138,7 +138,7 @@
 
         1.  元素：margin-edge, border-edge, padding-edge, content-edge
 
-        2.  <img src="media/image1.png" style="width:5.76806in;height:3.86806in" />
+        2.  <img src="media/css_review/image1.png" style="width:5.76806in;height:3.86806in" />
 
     
     1.  属性：
