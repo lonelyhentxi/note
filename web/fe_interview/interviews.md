@@ -1314,3 +1314,470 @@ Promise.all(tasks) //...
 ## Promise 的状态
 
 pending、fullfilled、rejected
+
+## VueX 相关问题汇总
+
+1. **VueX 是什么？**vuex 是 vue 的插件，目的是实现跨组件的状态量管理；唯一改变状态的方法是提交 mutation
+2. **VueX 解决了什么问题？**
+    - 多个组件依赖同一状态时，对于多层嵌套的组件的传参非常繁琐，并且兄弟组件之间传递状态无能为力
+    - 通过引用方式维护则非常脆弱
+    - 注：（react可以通过redux、context、组件传递来解决部分；angular 可以通过服务+依赖注入来解决问题；甚至可以自己实现消息总线来解决部分）
+3. **什么时候使用 VueX？** 
+    - 多个组件依赖同一个状态
+    - 不同组件的行为需要变更同一个状态
+4. **怎么引用 VueX**
+    - npm install
+    - import VueX from `vuex`
+    - Vue.use(VueX);
+    - const store = new Vue.Store({/* */})
+    - new Vue({store /* */})
+    - this.$store
+5. **vuex 的五个核心属性**
+    - state
+    - getters(state, gettersRef)
+    - mutations(state, data) 同步 commit(fnName, data)
+    - actions(context, data) 异步 dispatch(fnName, data)
+    - modules
+6. **状态存储在哪，怎么改变？** 存储在 state、唯一改变的途径是显式提交 mutation
+7. **状态时对象时，要注意什么？** 注意顶层 const 和 底层 const
+8. **在组件中批量使用 state 状态？** `computed: { ...mapState(['price', 'number']) }`
+9. **要从属性中派生出一些共用属性？** 使用类似于 computed 的 getters(state, gettersRef)
+10. **怎样给 getters 传递参数？** 利用高阶函数
+11. **批量利用 getters？** `computed: { ...mapGetters(['price', 'number']) }`
+12. **批量给 getters 取别名？** `computed: { ...mapGetters({a:'price', c:'number'}) }` 
+13. **批量利用 mutations?** `methods: { ...mapMutations({/**/}) }`
+14. **action 和 mutation 区别？** action 提交 mutation，action 可以包含异步动作，action 第一个参数是 context，包含 state、rootState、commit、dispatch、getters、rootGetters
+16. **action 和 mutation 相同点？** 可以改变参数和接收状态
+17. **多次提交 action？** methods mapActions
+18. **异步 action 处理？** 返回 promise
+19. **嵌套异步 action？** async await
+20. **vuex 模块系统？** 
+    - 每个模块拥有自己的状态和方法，通过在 Store 的 modules 中注册引入；
+    - 模块中的 state、mutation 都是局部的
+    - 想要访问全局，getter 可以通过第三个参数 rootState 第四个参数 rootGetters 访问
+    - mutation 不能访问全局
+    - action 可以通过 context 访问
+21. **vuex 命名空间？** 
+    - 添加 namespaced: true 可以避免 action、mutation 的全局分发，只分发最细化的
+    - 若要提交全局，传递 options `{root: true}`
+    - 在命名空间内定义全局 action，使用对象 actionA: `{root: true, handler: fn() {}}`
+    - 提交模块 mutation: `commit('module/mutation', data)`
+    - 映射模块 state 等 `const { mapState, mapActions } = createNamespacedHelpers('moduleA')`
+22. **VueX 插件？** 一个可以映射 store 的函数，在 Store 中以 plugins 引入
+23. **VueX 监听提交变更?** 使用插件，在 store 上订阅 `subscribe((mutation, state)=>{})` 和 `subscribeAction({before:(action,state)=>{}, after: (action: state=>{})})`
+24. **VueX 严格模式？** `strict: true`
+
+## Vue-Router 相关问题汇总
+
+1. **基本使用？** `VueRouter({routers: [{ path: '', component: xxx }]})`
+2. **重定向?**
+    - `redirect: '/path'`
+    - `redirect: { name: 'xxx' }`
+    - `redirect: ({hash, params, query}) => Route`
+3. **配置 404 页面？** `path: '*', redirect: { path: '/' }`
+4. **切换路由，保存草稿？**
+    - 后端保存
+    - `<keep-alive :include="include"><router-view></router-view></keep-alive>`
+5. **路由模式？** 
+    - hash 兼容所有浏览器，hash 改变会触发 hashchange 事件，event 包含 newURL 和 oldURL
+    - history/browser 浏览器的 HTML5 History API，初次访问或者刷新会向服务器请求，服务器需要设置通配符
+    - abstract 没有浏览器下的模式
+6. **导航守卫流程？**
+    1. 导航被触发
+    2. 在失活的组件里调用离开守卫 beforeRouteLeave(to,form,next)。
+    3. 调用全局的 beforeEach( (to,form,next) =>{} )守卫。
+    4. 在重用的组件里调用 beforeRouteUpdate(to,form,next) 守卫。
+    5. 在路由配置里调用 beforeEnter(to,form,next)路由独享的守卫。
+    6. 解析异步路由组件。
+    7. 在被激活的组件里调用 beforeRouteEnter(to,form,next)。
+    8. 在所有组件内守卫和异步路由组件被解析之后调用全局的 beforeResolve( (to,form,next) =>{} )解析守卫。
+    9. 导航被确认。
+    10. 调用全局的 afterEach( (to,form) =>{} )钩子。
+    11. 触发 DOM 更新。
+    12. 用创建好的实例调用beforeRouteEnter守卫中传给 next 的回调函数
+7. **导航守卫和实例生命周期钩子？** 导航守卫在所有实例生命周期钩子前执行
+8. **导航守卫的三个参数** 
+    - to 上一个路由
+    - from 下一个路由
+    - next
+        - 无参数调用，跳转
+        - false，中断
+        - Router，进行新的导航
+9. **afterEach 不接受 next**
+10. **全局守卫？路由独享守卫？**
+    - 全局 beforeEach, beforeEnter, beforeResove, afterEach
+    - 路由独享 beforeRouterEnter, beforeRouterLeave, beforeRouterUpdate 
+11. **全局、路由守卫使用方式？**
+    - 在路由定义中定义对应守卫、钩子
+    - 全局守卫使用方式 router.hooksName(fn)
+12 **beforeRouterEnter 可以使用 this 吗？** 不可以，组件生命周期未开始；但可以在 next 中传递回调函数
+13. **router-link？** 是  Vue-Router 内置组件，用于声明式导航。to、active-class、exact-active-class、exact、tag、append、replace 等属性
+14. **组件中监听路由参数的变化？**
+    - beforeRouteUpdate
+    - watch: $route
+15. **切换路由后新页面滚到顶部或者保持当前位置？** scrollBehavior(to、from、savedPosition) => {} 或者在钩子里设置
+16. **嵌套路由？** 跨页面通用组件（顶部栏/左侧菜单栏）
+17. **命名视图？** `<router-view name="">` 对于同个路由，过个视图需要多个组件，需要在 components 上正确设置 `resolve => require([], resolve)`
+18. **获取路由传递参数？**
+    - meta, `this.$route.meta.title`
+    - query, `this.$router.query.userID`
+    - params, 只能对命名路由传参，`this.$router.push({ name: 'home', params: { userId } })`，`this.$route.params.userId`
+19. **路由组件和路由为何解耦？怎么解耦合？** 避免组件只能在特定 URL 上使用；使用 props 来接耦合，对于包含命名视图的路由，必须分别为每个命名函数视图添加 props 选项
+20. **动态加载路由？** `component: ()=>import('xx') vm.$router.options.routes.push(...routes); vm.$router.addRoutes(routes);`
+21. **懒加载？**
+    - ()=>import('xx')
+    - resolve => require(`xxx`, resolve);
+22. **路由跳转？**
+    - `<router-link>`
+    - `router.push/replace`
+23. **跳转打开新窗口？** `const {href} = this.$router.resovle(obj); window.open(href, '_blank');`
+
+## Vue 相关问题汇总
+
+1. 兼容版本？
+    - IE10 Object.defineProperty() ES5
+    - 后续版本使用 Proxy ES6
+2. 生命周期？
+    - beforeCreate
+    - created
+    - beforeMount
+    - mounted：$el 可用，等待视图更新完毕使用 vm.$nextTick
+    - beforeUpdate
+    - updated
+    - activated
+    - deactivated
+    - beforeDestory
+    - destoryed
+3. data computed methods 能否重名？
+    - 不能重名
+4. 箭头函数：
+    - 不能使用，this 指向定义时的 this
+5. watch 监听后立即调用？
+    - 参数中指定 immediate: true
+6. watch 深度监听变化？
+    - 参数中指定 deep: true
+7. 强制刷新组件
+    - this.$forceUpdate
+    - 组件加上 key，变化 key 的值
+8. 组件绑定自定义事件无效？
+    - 加上修饰词 .native
+9. 访问实例？
+    - this.$refs.name
+    - this.$parent
+    - this.$root
+10. 组件销毁？
+    - 没有 keep-alive
+    - v-if
+    - vm.$destory
+11. is 属性？
+    - 动态组件
+12. 组件通信
+    - props
+    - $emit
+    - $someRef.$on $someRef.$emit
+    - $someRef
+    - $root
+    - $parent
+    - provide, inject
+    - vueX
+13. prop 的验证 type 类型
+    - 常见基本类型和构造函数 instanceof
+14. prop 的验证和默认值
+    - `[Type1, Type2]`
+    - `{type:Type,default:''}`
+    - `Type`
+15. event 的使用方法
+    - `@click="handlerOpen"`
+    - `@click="handleOpen(0, $event)"`
+16. $event.target 和 $event.currentTarget
+    - 发生元素
+    - 绑定元素
+17. 表单修饰符
+    - .number .lazy .trim
+18. 事件修饰符
+    - .stop .prevent .capture .self .once .passive
+19. 事件修饰符顺序很重要
+20. .lazy 的理解
+    - 不会理解监听变化，失去焦点后监听
+21. 键盘事件监听
+    - .enter .tab .delete .esc .space .up .down .left .right
+22. 常用指令
+    - v-show v-if v-else v-else-if v-for v-on v-bind v-model v-once v-slot v-html v-text
+23. v-once 的使用场景
+    - 只渲染一次的元素和组件
+24. v-show 和 v-if 
+    - 隐藏和消失
+25. v-on 绑定多个方法
+    - 接一个对象，不支持事件修饰符
+26. v-cloak
+    - 在页面渲染时将未编译标签显示，用于调试
+27. v-pre
+    - 跳过该元素和子元素的编译过程
+28. class 和 style 的动态绑定方式
+    - 数组
+    - 对象
+    - 数组和对象混合
+    - 对象和计算属性
+29. vue 文件中 style 和 script 组件是必须的吗？
+    - 非
+30. 只对当前组件生效的样式？
+    - style scoped
+31. 公共组件使用 scoped 的修改样式需要使用 deep
+32. scoped 原理？
+    - 在 DOM 结构和 CSS 加前缀
+33. 保留 html 注释
+    - comments: true 组件级
+    - `<template comments>`
+34. vm.$nextTick？
+    - 下次 DOM 更新循环后执行
+35. 重置 data？
+    - `Object.assign(this.$data, this.$options.data)`
+36. Vue 的 created 和 mounted 生命周期中请求数据的区别
+    - created 页面视图未出现，如果请求信息过多，会长时间白屏
+    - mounted 已经挂载，但渲染不一定完成，若需要请求非紧急任务，可以使用 $nextTick 函数
+37. v-model 的原理
+    - on 和 bind 的语法糖
+38. keep-alive 的理解
+    - keep-alive 是抽象组件，本身不会渲染 DOM 元素，也不会出现在父组件链中，使用 keep-alive 包裹动态组件时，会缓存不动的组件实例
+    - 参数：
+        - include 定义缓存白名单
+        - exclude 定义缓存黑名单
+        - 参数可以是逗号分隔字符串、数字或者正则表达式
+        - 匹配首先检查组件自身的 name 选项，如果不可用，则匹配它局部注册的组件名称。匿名组件不能被匹配
+        - max 最多可以被缓存多少实例，即缓存大小
+        - 当组件在内被切换时，其 activated 和 deactivated
+39. v-for 和 v-if 的优先级
+    - v-for 优先级高于 v-if ，如果需要批量 v-if 可以在外层设置，或者使用 `<template>`
+40. v-for 遍历对象的顺序？
+    - Object.keys()
+41. v-for 中使用 key ，会提升性能吗？
+    - 简单的列表，提升不大甚至有所降低
+    - 复杂的列表或者存在其它有复杂原位操作的节点，有提升
+42. key 除了 v-for 之外的其它使用场景？
+    - 强制替换元素而非重复使用，修改某节点的 key
+43. key 使用的注意
+    - 不要使用对象或者数组之类的非基本类型值作为 key
+    - 不要使用数组的 index 来作为 key
+44. 组件的命名规范？
+    - 字符串模板可以使用 `<my-component>` 或者 `<MyComponent>`
+    - 非字符串可以使用 `<MyComponent>` 遵循 W3C 规范，自定义组件应该全小写且包含连字符，防止和未来 html 标签冲突
+45. 组件中的 data 必须使用函数返回对象？
+    - 重用组件时，数据对象指向同一个引用，使用函数返回对象避免修改同一引用
+46. Vue 父子组件双向绑定的方法
+    - bind、props 和 on、emit
+    - v-model
+    - .sync 修饰符，父组件 `<myComponent :show.sync="show"></myComponent>`，子组件 `this.$emit('update:show',data)`
+47. 组件的 name 选项
+    - 递归组件时，组件调用自身
+    - is 特殊属性
+    - keep-alive 的 include 和 exclude
+48. 递归组件？
+    - 组件调用自身，注意配合 v-if 避免死循环，常见场景有 NavMenu
+49. 插槽的使用？
+    - 待插入组件使用 `<slot>` 或者 `<slot name="">` 的方式定义插槽
+    - 调用时，默认插槽直接在标签内插入内容，其它插槽按照 `v-slot:name` 或者 `#name` 的方式声明 `<template></template>` 及其中的插入内容
+50. $attrs 和 $listeners 的使用场景？
+    - $attrs 包含副作用中不作为 prop 被识别的特性绑定。在创建基础组件时候经常使用，可以和组件选项inheritAttrs:false和配合使用在组件内部标签上用v-bind="$attrs"将非prop特性绑定上去
+    - $listener 包含了父作用域中不含 .native 的 v-on 事件监视器
+51. 组件的依赖注入？
+    - provide 写在祖先组件中，inject 写在需要注入的子孙组件中；
+    - provide 是一个对象或者返回对象的函数
+    - inject 是一个字符串数组或者是一个对象（对象的key是本地绑定名，value是provide的key）
+55. EventBus 注册在全局上时，路由切换时重复触发事件的解决方式？
+    - 使用 $on 的组件中要在 beforeDestory 钩子中使用 $off 销毁
+56. Vue 组件里写的原生 addEventListener 监听事件，要手动销毁吗？
+    - 要，否则会多次绑定和内存泄露
+57. Vue 组件的定时器的销毁？
+    - 可以定义在一个定时器数组中，在组件销毁前依次销毁
+58. Vue 中可以监听数组变化的方法
+    - push pop shift unshift splice sort reverse vue 拦截并代理了这些方法
+    - fiter、concat、slice 会返回新数组
+59. Vue 不可以监听哪些数组方法？
+    - 使用索引直接设置一个数组项时，Object.defineProperty() 理论上可以监听下标访问，但是代价很大，且未知位置的索引不行；可以使用 this.$set(target, property, data) 来解决
+    - 修改数组的长度时，Object.defineProperty() 无法监听 length；可以使用 splice(startIndex, count, ...data) 解决
+60. vue 中无法监听变化的对象？为什么？怎么解决？
+    - 对象属性的添加和删除无法监听，它们只能追踪现有属性的变化，而无法监听新增和删除
+    - 可以使用 this.$set 来添加，Object.assign 来删除
+61. delete 和 Vue.delete 的区别？
+    - delete 删除对象成员
+    - Vue.delete 直接删除了对象成员，并触发视图更新
+62. watch 和 computed 的区别？
+    - watch，一个数据影响对个数据，当需要数据变化时，执行异步或者开销较大的操作时
+    - computed，一个数据受多个数据影响
+63. computed 和 methods 的区别？
+    - 前者响应式 + 缓存，后者每次更新都会触发
+64. 自定义指令和自定义指令钩子？
+    - Vue.directive('color', options)，使用 v-color 调用
+    - 钩子：
+        - bind：在指令第一次绑定到元素时调用
+        - inserted：被绑定元素插入父节点时调用
+        - update：所绑定节点的 VNode 更新时调用，调用时指令的值不一定改变，通过比较更新前后的值来忽略不必要的模板更新
+        - componentUpdated：指令所在组件 VNode 及其子 VNode 全部更新之后调用
+        - unbind 指令与元素接绑时调用
+    - 钩子函数的参数：
+        - el：指令所绑定的元素，可以直接操纵 DOM
+        - binding：
+            - name 指令名
+            - value 绑定的指令值
+            - expression 指令的绑定表达式
+            - arg 传给指令的参数
+            - modifiers 一个包含修饰符的对象
+            - oldValue 指令绑定的前一个值
+        - vnode Vue 编译生成的虚拟节点
+        - oldVnode 上一个虚拟节点，仅在 update 和 componnentUpdated 钩子中可用
+65. vue 定义全局方法？
+    - 挂载在 Vue 的 prototype 上
+    - 利用全局混入 mixin
+    - 用 this.$root.$on 绑定方法，$off 解绑方法，$emit 全局调用
+66. 对 DOM 选项 el、template、render 的理解
+    - el 提供一个 CSS 选择器或者 HTMLElement 实例作为 Vue 实例的挂载对象，该元素会被 Vue 生成的 DOM 替换；如果在 const vm = new Vue({}) 中存在该选项，实例将立即进入编译过程，否则需要显示调用 vm.$mount() 手动编译
+    - template 一个字符串模板作为 vue 实例的标识，如果 el 存在，vue 使用其中的内容替换 el
+    - render 函数若存在，则 Vue 会首先使用 render 方法进行渲染
+67. `<template>` 的作用
+    - 当作不可见的包裹元素，减少不必要的 DOM 元素
+68. 改变插入模板的分隔符
+    - delimiters 选项，默认是 `["{{","}}"]`
+69. 以 _，$ 开头的 Vue 属性发生问题？怎么访问到值？
+    - 它们不会被 Vue 代理，因为可能和 Vue API 冲突，可以使用 vm.$data._property 来访问
+70. Vue 组件错误信息的绑定？
+    - errorCaptured 是组件内部钩子，捕获子组件的错误，接收 error、vm、info 三个参数，return false 可以阻止向上冒泡
+    - errorHandler 为全局钩子，使用 Vue.config.errorHandler 配置，接收参数与 errorCaptured 一致
+71. Vue.observable？
+    - 让对象可响应，作为最小化的跨组件状态存储器
+72. favicon 的配置？
+    - 静态配置 `<link rel=icon href="<%= BASE_URL %>favicon.ico">`
+    - 动态配置 `<link rel="icon" type=<mime> href="">` 
+73. 打包后生成文件路径？
+    - publicPath
+74. 打包后静态资源失效，webpack -> resolve -> alias -> 'xx' : resolve('path')
+75. 动态设置 img 的 src 不生效，被当做静态资源处理，没有贬义，需要在 data 中设置，并加上 require('path')
+76. Vue 的模板引擎
+    - Mustache.js
+77. Vue 的核心
+    - Vue.js 的核心是一个允许采用简单的模板语法来声明式地将数据渲染进 DOM 的系统
+78. 单向数据流和双向数据流的理解？
+    - 单向是数据只能通过父级向子级传递
+    - 双向是数据向子级流动，通过事件等方式向父级流动
+79. vue 中实现虚拟 DOM？
+    - 新建 VNode 类，添加对应 DOM 节点上将要存在的属性。并将这些节点进行分类
+    - 通过编译将模板转换成渲染函数 render，执行渲染函数 render，生成不同的 VNode 类
+    - 通过 patch 将 vnode 和 oldVNode 比较后，生成真实 DOM
+80. vue 的 diff？
+    - 见 diff、react diff 和 vue diff 比较
+81. vue.nextTick 的原理？
+    1. 用异步队列的方式控制 DOM 更新和 nextTick 回调先后执行
+    2. 利用 microtask 队列的高优先级特性，确保任务中的微任务在一次时间循环前被执行完毕
+    3. 使用 promise、使用 setImmediate 、messageChannel、setTimeout 作为降级方案
+    4. 设置异步锁，使得该轮任务执行完毕，新的才能加入任务队列
+82. 说说你对Vue的template编译的理解？
+    1. 通过编译器将 template 转化为 AST 树
+    2. AST 树生成 render 函数，render 函数生成 VNode
+83. Vue实例挂载的过程是什么？
+    - 检测不是根节点（因为是替换）
+    - 调用 render 生成虚拟 Node，实例化一个渲染 Watcher，回调函数中调用 updateComponent，最终调用 vm._update 更新 DOM，设置 vm._isMounted 表示已经挂载
+84. 说下你对指令的理解？
+    - 是带有 v- 前缀的特殊 atrribute，当表达式改变时，将其值改变时，将其产生的连带影响，响应式的作用于 DOM
+85. 组件为何只能有一个根元素？
+    - 树状结构要求只能有一个根，方便对 VDOM 进行 diff
+86. EventBus？
+    - 一个 Vue 组件
+    - 通过对其进行事件触发和事件监听进行通信
+87. 使用Vue后怎么针对搜索引擎做SEO优化？
+    - ssr 单页面服务器渲染
+    - meta 信息
+    - 主动向搜索引擎提交 site.xml
+    - nuxt
+    - phantomjs
+88. 为何官方推荐使用axios而不用vue-resource？
+    - vue-resource 不再维护了
+    - axios 更加强大和通用
+    - 有 nodejs 版本
+    - 可以拦截、转换 JSON、防御 XSRF、取消请求、支持 Promise
+89. 使用 vue 如何做接口管理？
+    - 对上下文访问路径、超时时间、错误逻辑、拦截逻辑做统一处理，封装成文件，引入封装后对象
+90. 说说你对Vue组件的设计原则的理解
+    - TypeScript 万岁，可是 Vue2 支持不佳
+    - 容错处理要做好
+    - 颗粒化
+    - 高可配置性
+    - 语义化、命名良好
+    - 规范化
+91. 写出多种定义组件模板的方法
+    - 字符串
+    - 模板字面量
+    - `<script type=x-template></script>`
+    - 文件组件模板
+    - inline-template
+92. 你有使用过render函数吗？有什么好处？
+    - 更加自由、动态函数式的生成 VNode
+    - 尤其在生成动态表格时好用
+    - 便于 react 迁移
+93. 你了解什么是函数式组件吗？
+    - `createElement(tag/element-name, options { props, on, styles ... }, children)`
+94. 你有使用过JSX吗？说说你对JSX的理解？
+    - 新的语法糖，主要用于在 JavaScript 中直接加入 XML 内容，主要被 React 使用
+95. 如果想扩展某个现有的Vue组件时，怎么做呢？
+    - Vue.extend 拓展
+    - Vue.mixin 混入
+    - slot 拓展
+    - HOC 封装
+96. 你了解什么是高阶组件吗？可否举个例子说明下？
+    - React 中返回组件的函数
+    - 设计原则：
+        - 无副作用的纯函数
+        - 不关心传递的 props
+        - 接收到的 props 透传给包装组件
+    - Vue 中可以通过 mixin 实现，也可以通过 render 实现
+97. 怎么在Vue中使用插件？
+    - vue.use
+    - vue.$plugin
+98. 组件和插件有什么区别？
+    - 组件用来生成 VNODE tree
+    - 插件用来提供某种全局功能
+99. 为什么Vue使用异步更新组件？
+    - 多次进行修改后，实际只需进行最后一次修改
+    - 减少阻塞
+100. 你有看过Vue推荐的风格指南吗？列举出你知道的几条？
+    - 组件名为多个单词组件数据：组件的 data 必须是一个函数。
+    - 细致的 Prop 定义
+    - 总是用 :key 配合 v-for
+    - 避免 v-if 和 v-for 用在一起
+    - 为组件样式设置作用域
+    - 私有属性名：自定义私有属性使用 $_ 前缀。并附带一个命名空间以回避和其它作者的冲突 (比如 $_yourPluginName_)
+101. 为什么我们写组件的时候可以写在.vue里呢？可以是别的文件名后缀吗？
+    - webpack 的 vue-loader，检测逻辑就是 .vue，使用该后缀，IDE 和开发插件支持和识别更好
+    - 也可以写在 js, jsx, ts, tsx 只要检测逻辑和配置支持
+102. vue-loader是什么？它有什么作用？
+    - 是一个 webpack 的 loader
+    - 可以解析和转换 vue 文件，识别提取并分离模板、样式和逻辑并分别交给对应 loader 处理
+103. 分析下Vue项目本地开发完成后部署到服务器后报404是什么原因呢？
+    - 后端资源映射不对
+    - vue 配置中指向输出路径的 publicPath 不对
+    - resolve 有问题
+    - history 模式，后端没有进行范围匹配
+104. vue打包成最终的文件有哪些？
+    - index.html
+    - vendor.js
+    - app.js
+    - app.css
+105. 如何解决vue打包vendor过大的问题？
+    - 在 externals 配置中配置 CDN 引入的文件
+    - 路由懒加载
+106. webpack打包vue速度太慢怎么办？
+    - 升级到支持多进程的 webpack4
+    - 视条件减少 babel 和 polyfill 转译条件
+107. vue部署上线前需要做哪些准备工作？
+    - history 的服务端范围匹配
+    - publicPath
+    - cdn
+    - assetsPublicPath
+108. 你有使用过vue开发多语言项目吗？说说你的做法？
+    - vue-i18n
+109. 用vue怎么实现一个换肤的功能？
+    - 动态引入 css，重新加载页面
+110. 对于即将到来的vue3.0特性你有什么了解的吗？
+    - proxy 代替 definePropertyOf
+    - composition api
+    - 更好的依赖注入
+    - 原生 typescript
+    - API 变得太快 = class component -> functional API -> composition API
