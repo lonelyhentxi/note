@@ -1781,3 +1781,383 @@ pending、fullfilled、rejected
     - 更好的依赖注入
     - 原生 typescript
     - API 变得太快 = class component -> functional API -> composition API
+
+
+## SPA 的理解，优缺点？
+
+SPA 是一种将单个页面加载到服务器中的 WEB 应用，当浏览器向服务器发出请求时，客户端 APP 会随着首个 index.html 一起返回。url 变化不向服务器请求页面，通过路由实现页面切换。
+
+### 优点
+
+1. 交互体验良好，不需要重新刷新页面、获取资源，数据通过 ajax 异步获取，比较流畅
+2. 前后端分离
+3. 减小服务端动态渲染的成本
+
+### 缺点
+
+1. SEO 难度高
+2. 首屏加载速度慢
+
+## SPA 的实现方式？
+
+- hash 模式， window 上监听 hashchange 事件，驱动界面变化
+- history 模式，window 上监听 popstate 事件，驱动界面变化，监听 a 链接点击事件用 history.pushState、history.replaceState 方法驱动界面变化
+
+## 对 MVC、MVP、MVVM 模式的理解
+
+早期开发中，界面布局、界面交互逻辑、业务逻辑代码混杂，随着业务需求扩大，代码复杂化，开发变困难，维护代码困难：
+
+- MVC M 代表 Model，专门处理、存储数据；V 代表 View，将处理好的数据库发到 View。C 代表控制器，处理业务逻辑；用户操作 View，其发送指令到 Control，Control 处理业务逻辑后，要求 Model 处理响应数据并将数据发送给 View，View 将数据展示给用户 —— 三者相互影响，修改麻烦
+- MVP P 代表 Presenter，Presenter 将数据发送给 View，要求 View 把数据展示；Presenter 和 View 相互依赖；使得 View 和 Model 不再相互耦合 —— Presenter 和 View 仍然相互依赖，无法做单元测试
+- MVVM，VM 代表 ViewModel，于是只要建立 ViewModel 和 View 的映射，ViewModel 和 Model 的映射即可，相互之间的耦合，相对解除
+
+## 对 Object.defineProperty 的理解
+
+Object.defineProperty(obj, prop, descriptor) 会在对象上定义新属性，或者修改一个对象的现有属性，返回该对象
+
+- obj 要定义属性的对象
+- prop 要定义或者修改属性的名称
+- descriptor 要被定义或者修改的属性描述符
+
+descriptor 属性描述符的形式：数据描述符、存取描述符，描述只能是两者之一
+
+共同特性：
+
+- configurable 可设置性，能否被删除；除了 value 和 writable 之外的属性能否被修改，默认为 false； 能否修改为访问器属性
+- enumerable 能否在 for...in 循环和 Object.keys() 中被枚举，默认为 false
+
+数据描述符：
+
+- value 该属性对应的值，可以是任何有效的 JS 值，默认为 undefined
+- writable 当且仅当该属性的 writable 为 true 时，value 才能被复制运算符改变，默认为 false
+
+存取描述符：
+
+- get 一个给属性提供 getter 的方法，如果没有 getter 则为 undefined。当访问该属性时，该方法被执行。方法执行时，只有 this 可用，无参数。默认为 undefined
+- set 一个给属性提供 setter 的方法，如果没有 setter 则为 undefined。当属性值修改时，触发执行该方法。将接受 = 后的值为参数。默认为 undefined
+
+## 对 Proxy 的理解？
+
+proxy 对象用于定义基本操作的自定义行为，如属性查找、赋值、枚举、函数调用等。相当于拦截并修改某些操作的默认行为。使用方法为 `const proxy = new Proxy(target, handler)`，其中：
+
+- target 是用 proxy 包装的目标对象
+- handler 是一个对象，其属性是当执行一个操作时，定义代理的行为的函数，也就是自定义行为；handler 可以为 {} 但是不能为 null，否则会报错
+
+proxy 的操作，其中 receiver 代表在原型链上最初被调用的对象, newTarget 表示最初被调用的构造函数
+
+- get(target, property, receiver) => getter
+- set(target, property, value, receiver) => setter
+- has(target, property) => in
+- getPrototypeOf(target) => getPrototypeOf
+- setPrototypeOf(target, prototype) => setPrototypeOf
+- isExtensible(target) => Object.isExtensible Reflect.isExtensible（必须是对象，否则报错）
+- preventExtensions(target) => Object.preventExtensions Reflect.preventExtensions
+- getOwnPropertyDescriptor(target, prop) => Object/Reflect.getOwnPropertyDescriptor
+- deleteProperty(target, property) => delete obj.prop, Reflect.deleteProperty
+- constructor(target, argumentsList, newTarget) => Reflect.construct new proxy(...args)
+- ownKeys(target) => Reflect.ownKeys Object.keys Object.getOwnPropertySymbols Object.getOwnPropertyNames
+- apply(target, thisArg, argumentsList) => proxy(...args) Function.prototype.apply Function.prototype.call Reflect.apply
+
+## Object.defineProperty 和 Proxy 的区别
+
+Object.defineProperty
+
+- 不能监听数组 length 的变化，因为它的 configurable 为 false
+- 不能监听对象的添加和删除
+- 只能劫持对象的属性
+
+Proxy
+
+- 可代理整个对象
+- 多达 13 种操作
+
+## 什么是虚拟 DOM
+
+虚拟 DOM 是将状态映射为视图的众多解决方式中的一种，通过状态生成一个虚拟节点树，然后使用虚拟节点树生成 DOM，生成之前会使用不同的 diff 算法，只渲染不同的部分
+
+## 传统 diff、Vue diff、React diff
+
+### 传统 diff
+
+递归循环每个节点，O(n^3)
+
+### React 的 diff
+
+相同类型的两个组件产生的 DOM 树结构相似，对于同一层级的一组子节点，先序深度优先遍历树并标号，遍历过程中，对比新旧节点，将差异记录下来在 patches 中；
+
+#### tree diff:
+
+分层求异
+
+#### component diff
+
+- 同类型的组件，进行 tree diff，其间检查 shouldComponentUpdate 钩子来判断是否需要更新
+- 不同类型的组件，替换整个组件下的所有节点
+
+### element diff
+
+差异类型：
+
+1. 插入
+2. 移动
+3. 删除
+4. 文本内容改变
+5. 属性改变（包括 className 改变）
+
+列表对比，设置 element key，默认为标号；顺序从前到后，注意减少最后一个节点向前的移动
+
+### Vue 的 diff
+
+同层级比较，使用 VNode 描述节点，调用 patch 函数：
+
+- 对于不同元素、不同 className 认为是不同节点
+- 让 vnode.el 引用现在的真实 el
+- 如果节点引用相同，认为无变化
+- 如果文本都是文本节点且文本不同，更新节点文本
+- 如果挂载出现变化，更新挂载
+- 对子节点进行插入、删除或者更新
+
+更新子节点的方式：
+
+- 新旧子节点各有 startIdx 和 endIdx
+- 从两端到中间相互比较，四种比较方式，若都未匹配且设置 key，则用 key 比较
+- startIdx > endIdx 时比较结束
+
+## axios 是什么？怎么使用？怎么解决跨域问题？
+
+是一种和 ajax 类似的异步请求包，包括 get、post、put、patch、delete 方式，解决跨域可以在服务器响应中添加 Access-Control-Allow-Origin
+
+## ajax、fetch、axios
+
+- ajax 是概念，传统上指基于 XMLHttpRequest 的一种实现，通过 success 和 error 回调函数返回
+- fetch 是浏览器实现的 webAPI，基于 Promise 对象原生封装
+- axios 是一个基于 ajax 封装的库，返回 Promise
+
+## 你有封装过axios吗？主要是封装哪方面的？
+
+统一上下文请求路径、超时时间、路径、错误处理、拦截、提示和 loading
+
+## 如何中断axios的请求？
+
+和 C# 一样，cancelToken，当调用 cancel 即可
+
+## 如果将axios异步请求同步化处理？
+
+1. then 链
+2. async await 
+3. asyncIterable
+4. Observable Promise
+
+## 你了解axios的原理吗？有看过它的源码吗？
+
+对 ajax 的封装，添加了拦截、自动 json、错误处理、promise 化等内容；没看过
+
+## 如何优化首页的加载速度？
+   
+- ssr
+- cdn
+- pwa
+- 懒加载和延迟加载
+- 骨架屏
+- 渐进、并发（WebWorker、React Concurrency）、部分渲染
+- 分块、分包、tree shaking
+
+## 渲染大量数据时应该怎么优化？
+
+- 设置 key
+- 分页
+- 虚表（只渲染需要的数据）
+- Object.freeze 避免 vue 的响应式工作
+- 时间分片，渐进式渲染（处理部分数据 -> 渲染 -> 处理部分数据 -> 渲染）
+
+## 你有使用过babel-polyfill模块吗？主要是用来做什么的？
+
+babel 默认只转译语法，babel-polyfill 转换新 API 以保证兼容
+
+## Webpack 打包优化
+
+- webpack 4+ 多进程打包
+- externals 部分使用 CDN
+- 减少不必要的 混淆、 babel 和 polyfill
+- 分包、按需懒加载
+- tree shaking
+- splitChunks
+- 提取 css
+
+## 伪类和伪元素
+
+- 伪类用于当已有元素处于某个状态时，为其添加对应的样式
+- 伪元素用于创建一些不在文档树中的元素
+
+## 什么情况下css会使用gpu加速
+
+DOM 树和 CSS 结合后形成浏览器构建页面的渲染树。渲染树中包含了大量的渲染元素，每一个渲染元素会被分到一个图层中，每个图层又会被加载到 GPU 形成渲染纹理，图层在 GPU 中的 transform 是不会触发 repaint 
+
+- video 和 canvas 元素
+- CSS filter（滤镜：修改饱和度和模糊等）
+- opacity
+- 元素覆盖，使用 z-index 属性
+
+## rpx是什么
+
+微信小程序的单位 1rpx = 屏幕宽度 / 750
+
+## 什么是 sass 和 less 、postcss
+
+都是 CSS 预处理器
+
+- sass 最早和最成熟的预处理器，其后续 scss 完全兼容 css，较强大
+- less 后期之秀，可编程性较弱但较为简单，兼容 css
+- postcss 最强大，提供使用 js 处理 css 的方式，它提供了 css 解析成抽象语法树的解析器
+
+## React 中使用 CSS
+
+styled-components，发挥 js 的强大性
+
+## shadow dom 是什么
+
+是浏览器的一种能力，允许浏览器在渲染文档的时候向 DOM 结构中插入一颗 DOM 元素子树，它不在主 DOM 树中。目的主要是屏蔽组件内部的复杂性。
+
+其结构为：
+
+- document
+- shadow host 宿主元素
+- shadow root 通过 createShadowRoot 返回的文档片段
+- contents 各子组件 dom 的具体实现
+
+可以使用伪元素控制 shadow-dom 样式，或者自己创建 shadow-dom 元素
+
+## canvas图层怎么用
+
+原生没有图层，替代方案：
+
+- 多个重叠图层，设置渲染覆盖方案
+- WebGL 操作
+
+## dom 渲染的性能损耗在哪里
+
+重排和重绘
+
+## 浏览器里除了 js 还能运行什么
+
+webassembly
+
+## 浏览器如何缓存
+
+1. localStorage/sessionStorage/indexDB
+2. ServiceWorker/CacheAPI
+3. 设置 http 的头部 Cache-Control Expires
+
+## 详述http 1.0, 1.1, 2.0的区别
+
+1. HTTP/1.0 - 特性：
+    - 协议信息随着每个请求发送
+    - 状态码在响应开始时发送
+    - 引入 HTTP 头
+    - 可以使用 Content-Type 头来传输除 HTML 文件外其他类型文档的能力
+2. HTTP/1.1
+    - 特性：
+        - 连接可以复用
+        - 增加流水线
+        - 支持响应分块
+        - 引入缓存控制
+        - 引入内容协商
+        - 使用 Host 头，使得不同域名可以配置在同一个 IP 地址的服务上
+    - 拓展：
+        - 用于安全传输：SSL 和 TLS
+        - 用于复杂应用：
+            - REST
+            - Server-sent events
+            - WebSocket
+        - 放松 Web 的安全模型：CORS、DNT、CSP
+3. HTTP/2 - SDPY
+    - 特性：
+        - HTTP/2 是二进制协议。不可再读，也不可无障碍的手动创建
+        - 并行的请求能够在一个链接中处理，移除了 1.x 中的顺序和阻塞（但是仍然存在队首阻塞）
+        - 压缩了 headers，一系列的请求中部分 headers 可以压缩
+        - 允许服务器在客户端缓存中填充数据，通过有限的服务器推送机制来提前请求
+    - 拓展：
+        - 对 Alt-Src 的支持允许了给定资源的位置和资源鉴定，允许更加智能的 CDN 缓存机制
+        - Client-Hints 的引入允许客户端和服务器主动交流它的需求和硬件约束的信息
+        - 在 Cookie 头中引入安全相关的前缀，可以帮助一个安全的 Cookie 没有被修改过
+
+## 详述TCP如何保证传输完整性
+
+- 定时器 + ACK + 重传
+- 首部校验和
+- 重排序
+- 流量控制
+- 序号丢弃重复
+- 有连接
+
+## UDP和TCP有什么区别
+
+- TCP：有连接，可靠，流控
+- UDP： 无连接，不可靠
+
+## 为什么使用 UDP
+
+- 可靠性排序靠后
+- 时效性较重要
+- 减少流控的影响
+
+## WebSocket？
+
+复用 http 1.1 的握手协议，完成后后续交换按照 WebSocket 协议。
+
+首部：
+
+- Connection: Upgrade 表示升级协议
+- Upgrade: websocket 表示升级到 Websocket
+- Sec-WebSocket-Version: 13 表示支持的版本号，如果服务器不支持，需要返回其 Sec-WebSocket-Version
+- Sec-WebSocket-Key 与响应的 Sec-WebSocket-Accept 配套
+
+## 分布式系统用什么算法排序？
+
+map-reduce、归并
+
+## hybrid是什么？
+
+抽象上说是混合模式移动应用，常见的有 原生 + WebView、ReactNative、Ionic 等；实际上国内常代指某一早期实现
+
+## hybrid js如何调用native接口？
+
+例如使用 mWebView 的  @JavascriptInterface 定义 interface，调用为 window.Android.functionName()
+
+## webpack编译和构建原理 ?
+
+@TODO
+
+## babel转码流程 ？
+
+@TODO
+
+## js哈希存储结构的构成方式 ?
+
+@TODO
+
+## OAUTH、JWT?
+
+@TODO
+
+## XSS，CSRF，数据库注入怎么防范？
+
+XSS：控制前端渲染
+CSRF：控制后端处理
+数据库注入：预编译
+
+@TODO
+
+## Angular 脏数据检测的原理
+
+早期 angular 使用从树顶到底下进行脏检查，每个组件拥有自己的检查函数
+
+zone.js 对异步事件做代理包裹。ApplicationRef 类，监听 ngZone 中的 onTurnDone 事件，只要触发事件，执行 tick 方法对变更做检测
+
+## https 密钥交换过程？
+
+@TODO
+
+## 强缓存 + 协商缓存
+
+@TODO
