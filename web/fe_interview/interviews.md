@@ -138,13 +138,7 @@ this.$refs.childrenRef.func()
 ```
 
 ```css
-.over-flow{
-    overflow: auto; zoom: 1; // zoom 是在处理兼容性问题
-}
-```
-
-```css
-.outer:after {
+.outer::after {
     clear: both;
     content: '';
     display: block;
@@ -547,12 +541,6 @@ ES5 的 var，全局和函数级
 ES6 词法块级作用域
 函数化的闭包，实现为对值对象获取其当时值快照、引用对象获取引用指针保存在创建的匿名对象中，通过类似 operator() 的方法予以调用
 
-## 输入 URL 到渲染完成
-
-域名解析-TCP分包-IP寻路-握手-滑动窗口传输-持久化连接-挥手-解析-构建dom树与cssom-构建渲染树-回流-重绘-渲染
-
-@TODO
-
 ## Promise.all 用法和实现
 
 Promise.all(PromiseArray).then() 等待全部任务完成后执行，或者出现第一个失败
@@ -816,10 +804,6 @@ JS 执行上下文就是 JavaScript 代码被解析和执行时所在环境的�
 - position: absolute 或者 fixed
 - display: block, inline block, table-cell, table-caption, inline table, display: flow-root, contain: layout/content/paint 的元素，弹性元素、网格元素、多列元素, overflow: visible
 - 匿名块盒子
-
-## 深拷贝
-
-@TODO
 
 ## 什么是 XSS 攻击？分为哪几类？怎么防范？
 
@@ -1181,7 +1165,56 @@ function jsonStringify(data, set) {
 
 ## 实现 Observable 和 Subject
 
-@TODO
+### Observable:
+
+```js
+function myObservable(observer) {
+    const datasource = new DataSource();
+    datasource.ondata(e) => observer.next(e);
+    datasource.onerror(err) => observer.error(err);
+    datasource.oncomplete() => observer.complete();
+    return () => {
+        datasource.destroy();
+    };
+}
+```
+
+观察者约定：
+
+1. 不在 complete 或者 error 后调用 next
+2. 取消订阅后，不能使用任何方法
+3. 调用 complete 和 error 需要取消订阅逻辑
+4. 如果 next、complete 或者 error 处理方法抛出异常，要调用取消订阅逻辑，以确保不会泄露资源
+5. next、error 和 complete 实际上都是可选的。你无需处理每个值、错误或完成。你可能只是想要处理其中一二
+
+### Subjects 实现
+
+```js
+class MySubject extends Rx.Observable {
+ 
+ constructor() {
+   super();
+   this.observers = [];
+ }
+ 
+ subscribe(observer) {
+   this.observers.push(observer);
+ }
+ 
+ next(value) {
+   this.observers.forEach(observer => observer.next(value));
+ }
+ 
+ error(error) {
+   this.observers.forEach(observer => observer.error(error));
+ }
+ 
+ complete() {
+   this.observers.forEach(observer => observer.complete());
+ }
+ 
+}
+```
 
 ## 使用 CSS 让一个元素水平垂直居中
 
@@ -2126,19 +2159,54 @@ map-reduce、归并
 
 ## webpack编译和构建原理 ?
 
-@TODO
+流程概括：
+
+1. 初始化参数：从配置文件和 shell 语句中读取和合并参数，得到最终的参数
+2. 开始编译：用上一步得到的参数初始化 Compiler 对象，加载所有配置的插件，执行对象的 run 方法开始执行编译
+3. 确定入口：根据配置中的 entry 找到所有的入口文件
+4. 编译模块：从入口文件出发，调用所有配置的 Loader 对模块进行翻译，再找出该模块依赖的模块，递归本步骤直到所有入口依赖的文件都经过本步骤的处理
+5. 完成模块编译：在经过第四步使用 Loader 翻译完所有模块后，得到每个模块被翻译后的最终内容和他们之间的依赖关系
+6. 输出资源：根据入口和模块之间的依赖关系，组装成一个个包含多个模块的 chunk，将每个 chunk 转化成一个单独的文件加入到输出列表
+7. 输出完成：确定好输出内容后，根据配置确定输出的路径和文件名，把文件内容写入到文件系统
 
 ## babel转码流程 ？
 
-@TODO
+babel 及其插件会按照参数被加载到 Webpack 的 Compiler 对象中（使用 webpack + babel 的一般流程）
 
-## js哈希存储结构的构成方式 ?
+- 词法分析和语法分析，将字符串流转换成令牌流，再转换成 AST 树
+- 然后经由 Transformer（babel-traverse） 转换成目标语言的 AST 树，过程中有添加、更新和移除等操作；babel-traverse 使用 visitor 对象来供我们获取 AST 中具体节点，使用 path 表示对节点之间连接的访问
+- 最终使用 Generator（babel-generator）深度优先遍历，生成目标语言，同时还会按要求生成源码映射
 
-@TODO
+## js 哈希存储结构的构成方式 ?
 
-## OAUTH、JWT?
+hash 常用构造方法：
 
-@TODO
+1. 直接地址法
+2. 除数留余法
+3. 数字分析法
+4. 平方求和法
+5. 分段求和法
+
+哈希冲突的解决方法：
+
+1. 开放定址法：可能造成二次聚集，装填因子较小
+    - 线性探测再散列
+    - 二次探测再散列
+    - 伪随机探测再散列
+2. 再 hash 法：增加了计算时间
+3. 链地址法：处理简单，无堆积；适用于无法确定表长，各节点动态申请，适合于造表前无法确定表长；需要额外空间
+4. 公共溢出区
+
+Map、Set、WeakSet、WeakMap 小于八个线性查找，多于之后变成 hashmap。在 V8 中，散列码是一个随机数，与对象无关，不能重新计算它。对于将 JS 对象作为 key 的情况，V8 将哈希码作为私有对象存储在对象上。V8 的私有符号和 Symbol 类似，但是不可枚举，只能在 V8 内部使用。
+
+- 当属性存储是空的时候，可以直接在 JSObject 的偏移量上存储 hashcode
+- 当属性存储是数组：
+    - 最低有效位是指针标志位，其余 31 位表示实际整数值，最大小于 2^31 的整数在 JS 上更加高效；- 通常数组将长度存储为 SmallInteger ，因此最大长度为 10 比特即可表示，可以使用剩下的 21 位来存储 hashcode
+- 当属性是字典：将字典大小增加一个字，以便将哈希吗存储在字典起始位置的专用槽中
+
+## OAUTH、JWT、Open?
+
+见认证、授权和凭证
 
 ## XSS，CSRF，数据库注入怎么防范？
 
@@ -2146,18 +2214,284 @@ XSS：控制前端渲染
 CSRF：控制后端处理
 数据库注入：预编译
 
-@TODO
-
 ## Angular 脏数据检测的原理
 
 早期 angular 使用从树顶到底下进行脏检查，每个组件拥有自己的检查函数
 
 zone.js 对异步事件做代理包裹。ApplicationRef 类，监听 ngZone 中的 onTurnDone 事件，只要触发事件，执行 tick 方法对变更做检测
 
-## https 密钥交换过程？
+## 浏览器 & HTTP 缓存策略
 
-@TODO
+### 强缓存
 
-## 强缓存 + 协商缓存
+指在缓存期间，请求不会发送到放服务器，浏览器直接返回缓存结果，需要设置 Header：
 
-@TODO
+- Expires：是 HTTP/1.0 中用于控制网页缓存的字段，表示过期时间；此时使用的是客户端时间和缓存失效时间对比，当用户修改客户端时间时可能导致强缓存失效
+- Cache-Control：是 HTTP/1.1 中设置的。其常见值为：
+    - public 所有内容都被缓存（客户端和代理服务器）
+    - private 所有内容只有客户端可以缓存，默认为 private
+    - no-cache 客户端缓存内容，但是否使用缓存需要经过协商来决定
+    - no-store 所有内容都不会被缓存
+    - max-age=xxx 缓存内容将在 xxx 秒后失效
+
+上述两者同时存在，只有后者生效；其仅仅为兼容作用
+
+### 内存缓存和磁盘缓存
+
+1. 大文件，优先缓存到 disk，否则 mem
+2. 当内存占用率高时，优先缓存到 disk
+
+### 协商缓存
+
+当请求没有命中缓存，或者强缓存失效后，需要向服务器发起请求，验证资源是否有更新。如果资源没有改变，返回 304，并更新浏览器缓存有效期；资源改变，返回 200 响应码，并返回响应资源，并更新浏览器缓存有效期。使用的 HTTP 头如下：
+
+1. Last-Modified & If-Modified-Since：前者表示文件最后的修改日期，由服务器添加到响应头中；后者由浏览器添加到请求头中，是上次该资源的 Last-Modified 值。浏览器收到请求后，会将后者和服务器上该文件修改时间戳对比，如果超过缓存时间，那么返回最新的资源，200 状态码；缺点如下：
+    - 如果文件打开过，修改时间会发生改变，导致该对失效
+    - 精确度只有一秒
+2. etag 和 If-None-Match：etag 类似文件指纹，由服务器添加到响应头中，浏览器会在请求头中添加 If-none-match 头，和 etag 比较；如果不一样，则返回 200 和资源；如果一样，返回 304。
+
+当任意缓存策略都没有设置，浏览器会采取启发式策略，通常会读取 Response Header 中的 date 头，减去 Last-Modified 值的 10% 作为缓存时间。
+
+### 实际场景
+
+对于频繁变动的资源：
+
+1. 完全不缓存: no-store
+2. 协商缓存：cache-control：no-cache，是浏览器每次都会走服务器，然后配合 etag 或者 last-modified 来验证资源是否有效，这样对于完全不缓存来说，虽然无法减少 HTTP 请求次数，可以显著减少响应数据大小。
+
+文件：
+
+1. HTML 文件不设缓存；
+2. CSS、JS 等文件可以设置一个较长的缓存期，比如一年，使用文件名_hash 的方法来更新文件；
+
+## 低版本 IE 的盒模型和 W3C 的盒模型有什么区别？
+
+两种盒模型：
+
+1. IE 盒模型 border-box
+2. W3C 盒模型 content-box
+
+IE 老版本声明 DOCTYPE 会使得变为 W3C
+
+## CSS 选择符有哪些？
+
+- id 选择器 #id
+- 类选择器 .classname
+- 标签选择器 li
+- 后代选择器 li a
+- 子选择器 li>a
+- 兄弟选择器 li~a
+- 相邻兄弟选择器 li+a
+- 属性选择器 a[rel="xxx"][disabled]
+- 伪类选择器 a:hover, li:nth-child(2)
+- 伪元素选择器 ::before ::after
+- 通配符选择器 *
+
+## ::before 和 :after 中的双冒号和单冒号有什么区别？
+
+单冒号用于 CSS3 伪类，双冒号用于 CSS 伪元素；浏览器为兼容性考虑，仍然坚持就得伪元素的单冒号写法。
+
+## 哪些 CSS 属性可以继承？
+
+每一个属性的定义中都给出了该属性可否定义，一个没有继承性的属性会在没有指定值的时候，选择继承值作为自己的值。当元素不是继承属性的时候，可以设置 inherit 来使得进行继承。
+
+1. 字体系列属性
+2. 文本系列属性
+3. 表格布局属性
+4. 列表选择
+5. 光标属性
+6. 元素可见性
+7. 元素存在性
+
+## CSS 优先级算法如何计算？
+
+确定是否使用 !important 如果只有一个有，使用它；否则进入优先级规则。
+
+一条匹配规则一般由多个选择器组成，一条规则的特殊性由组成它的选择器的特殊性累加而成。内联样式 1000，id 选择器 100，类选择器、伪类选择器 10，元素选择器、伪元素选择器 1。值无法进位；
+
+相同值则按前后顺序计算。
+
+## LVHA 伪类
+
+1. link 未访问过
+2. visited 访问过
+3. active 活跃状态
+4. hover 鼠标悬停
+
+可以改变 LVHA 的活动顺序保证在超链接访问过后，hover 仍然出现
+
+## 移动端的点击事件延迟 300 毫秒？
+
+判断用户是否再次点击屏幕
+
+## CSS3 新增伪类？
+
+- nth-child(n) 选中父元素下的第 n 个子元素，并且该子元素标签名为 elem，n 可以是数值也可以是函数
+- nth-last-child(n) 作用同上，反向查找
+- last-child 最后一个子元素
+- only-child 是父元素的唯一一个子元素
+- nth-of-type(n) 父元素下第一个元素为 elem 的类型元素
+- first-of-type 父元素下第一个类型为 elem 类型元素
+- last-of-type
+- only-of-type
+- target 选择当前活动的 elem 元素（使用 a href="#xxx" 进行跳转时）
+- not(elem) 选择非 elem 元素的每个元素
+- enabled 控制表单控件的禁用状态
+
+## postition 的定位原点
+
+- absolute：生成绝对定位的元素，相对于值不为 static 的第一个父元素的 paddingbox 左上角进行定位
+- fixed：相对于视口左上角
+- relative：相对于 static 位置
+- static：默认值，元素正常出现在流中
+- inherit：规定从父元素继承 position 属性的值
+
+## CSS3 有哪些新特性
+
+- 新增各种选择器
+- 圆角
+- 多列布局
+- 反射和阴影
+- 文字特效
+- 文字渲染
+- 线性渐变
+- 图形学变换
+- 透视和 3D 变换
+
+## 请简要解释 CSS3 的 flexbox 弹性盒布局模型和适用场景？
+
+flex 是 CSS3 新增的一种布局方式，可以通过将一个元素的 display 属性设置为 flex 将其设置为一个 flex 容器，所有的子元素都变成其项目。
+
+一个容器默认有两条轴，以 flex-direction 作为主轴，其垂直方向作为交叉轴。可以使用 justify-content 来指定元素在主轴上的排列方式，使用 align-items 来指定在交叉轴的排列方式，align-content 指定在多个交叉轴的排列方式，flex-wrap 设定当一行排列不下时的换行方式。
+
+对于容器中的项目，可以使用 order 来指定项目的排列顺序，还可以使用 flex-grow 来指定排列项目的放大比例。可以使用 flex-shrink 来指定当排列空间不足时，项目的缩小比例
+
+## 如何用纯 CSS 创建一个三角形
+
+### 传统方法
+
+利用 CSS 的绘制原理，取消三条边
+
+```css
+#demo {
+    width: 0;
+    height: 0;
+    border-with: 20px;
+    border-style: solid;
+    border-color: transparent transparent red transparent;
+}
+```
+
+### clip-path
+
+```css
+#demo {
+    height: 30px;
+    width: 30px;
+    background: blue;
+    clip-path: polygon(50% 0, 0 100%, 100% 100%);
+}
+```
+
+## 绘制椭圆
+
+```css
+#demo {
+    height: 30px;
+    width: 30px;
+    background: blue;
+    clip-path: ellipse(10% 30% at 50% 50%);
+}
+```
+
+## CSS 多列等高
+
+1. flex align-items 默认为 stretch，如果项目未设置高度或者设置 auto，将占满整个父容器的全部高度
+2. 利用 table-cell
+3. 利用 grid 的 align-items
+4. 多列布局
+
+## 经常遇到的浏览器兼容性问题有哪些？
+
+- 早期 IE 版本不支持 ES6，包括 promise、observableMutation、proxy、defineProperty 等
+- 早期 IE 盒模型为 border-box，但是该问题只要使用 DOCTYPE 就会自动切换成 W3C 盒模型比较好解决
+- 不支持的 CSS 属性，加浏览器前缀
+- 移动浏览器点击的 300ms 延时
+- ……
+
+## 为什么要初始化 CSS 样式
+
+由于浏览器兼容性问题，不同的浏览器对不同元素和属性的默认值不同，如果没有初始化，会造成表现不同。
+
+## 什么是包含块？
+
+包含块是元素用来计算和定位的框。即如何确定自身定位的框。详细见 css 复习笔记。
+
+## visibility 的 collapse 属性？
+
+1. 对于一般的元素，表现和 visibility: hidden 相同。不可见但是仍然占据资源
+2. 对于表格元素，占用的空间会释放
+
+## 使用图片 base64 编码的优点和缺点
+
+图片处理格式，可以将图片转换为字符串
+
+优点：
+
+1. 减少图片的 HTTP 请求
+
+缺点：
+
+1. 大小较大
+2. 无法直接缓存
+3. 更改图片必须修改 html
+
+## margin 重叠问题的理解
+
+1. 相邻兄弟元素的 margin-top 和 margin-bottom，设置 BFC
+2. 父元素和子元素的上外边界重叠，设置父元素的 padding 或者 border、为父元素设置 BFC
+3. 无高度的父元素和子元素的下边界重叠，如上操作或者设置高度
+4. 无内容元素自身上、下边界重叠
+
+## CSS 优化、提高性能的方法？
+
+加载性能：
+
+- CSS 压缩
+- CSS 单一样式
+- 减少 @import 多使用 link
+
+选择器性能：
+
+- 关键选择器
+- 减少通配符
+
+渲染性能：
+
+- 慎重使用高性能属性：浮动、定位
+- 减少页面重排和重绘
+- 去除空规则
+- 属性值为 0，不加单位
+
+## 浏览器怎样解析 CSS 选择器
+
+从右到左确定选择器，从关键选择器开始
+
+## 简单说一下 CSS3 的 all 属性？
+
+所有的属性都如何，支持 initial、inherit 和 unset
+
+## 为什么不建议使用通配符初始化 CSS 样式？
+
+性能损失严重，某些特性无法初始化，如 chrome 中的搜索组件默认是圆角的
+
+## absolute 的 containingblock 的计算方式和正常流的不同？
+
+1. 内联元素可以作为包含块所在元素
+2. 包含块是最近非 static 父元素
+3. 边界是 paddingbox 而不是 contentbox
+
+## 元素竖向百分比设定是相对于容器的高度吗？
+
+- height 相对于包含块的高度
+- padding 和 margin 相对于包含块的宽度
