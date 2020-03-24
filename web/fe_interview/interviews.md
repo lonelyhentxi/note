@@ -2495,3 +2495,479 @@ flex 是 CSS3 新增的一种布局方式，可以通过将一个元素的 displ
 
 - height 相对于包含块的高度
 - padding 和 margin 相对于包含块的宽度
+
+
+## 全屏滚动的原理？
+
+```css
+overflow: hidden;
+transition: all 1000ms ease;
+```
+
+## 视差滚动效果，如何给每页做不同的动画？
+
+视差滚动是指多层背景以不同的速度移动，形成立体的运动效果，带来非常出色的视觉体验
+
+## 如何修改 chrome 记住密码后自动填充表单的黄色背景？
+
+修改 chrome 的 input:-webkit-autofill 私有属性即可
+
+## 怎么让 chrome 支持小于 12px 的文字
+
+使用 -webkit-text-size-adjust:none 私有属性解决；
+
+或者使用 transform 缩放，注意整个元素会一起缩放
+
+## 怎样让某些层不可拖动？（electron）
+
+1. z-index
+2. -webkit-app-region: drag
+
+## 让页面字体变得清晰，变细用 CSS 怎么做？
+
+font-smoothing 用于字体抗锯齿
+
+## font-style 的 italic 和 oblique 的区别？
+
+前者使用斜体字体形状，后台使用切变算法将字体变斜
+
+## 设备像素、CSS 像素、设备独立像素、dpr、ppi 之间的区别
+
+- 设备像素指物理尺寸
+- CSS 像素等同于独立像素，取决于页面缩放程度和 DPR 的大小
+- dpr 指的是设备独立像素和设备像素的比值（反比）
+- ppi 指的是每英寸的物理像素的密度
+
+## layoutviewport、visualviewport 和 idealviewport 的区别？
+
+- layoutviewport 是实际的文档大小，因为可能将页面设置的比视口大
+- visualviewport 是设备视口的大小（桌面设备为浏览器窗口内边距）
+- idealviewport 指的是最适合移动设备的 viewport，能够使得不出现横向滚动条也不需要缩放
+
+## position: fixed 的在 android 下无效
+
+在移动端默认浏览器的 viewport 是 layoutviewport，因此 fixed 是相对该值移动。
+
+```html
+<metaname="viewport"content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-sca
+le=1.0,user-scalable=no"/>
+```
+
+可以如上设置，将视口宽度改变为 idealviewport
+
+## 如果需要手写动画，最小间隔为多少？
+
+对于 60hz 屏幕为 1/60s = 16.7 ms
+
+## 如何去除 inline-block 元素的元素间间距？
+
+移除空格、使用 margin 负值、使用 font-size: 0、letter-space、word-spacing
+
+## overflow: scroll 不能平滑滚动？
+
+可以开启安卓的硬件加速。原理是开启一个独立的渲染层，由于只发生 transform: translate() 所以可以触发硬件加速
+
+```css
+-webkit-overflow-scrolling:touch;
+```
+
+## 有一个高度自适应的 div，里面有两个 div，一个高度 100px，希望另一个填满剩下的高度？
+
+1. display: flex; flex-direction: column; flex-grow: 1;
+2. 容器使用 relative 内部使用 position: absolute; top: 100px; bottom: 0; left: 0; right: 0;
+
+## png、jpg、gif、webp、heic、bmp 等图片的使用
+
+1. bmp 无损，支持索引色和直接色的点阵图。几乎没有压缩数据。
+2. gif 无损，索引色，点阵图。LZW 算法，支持透明，大小小，色彩素质低，支持动图。
+3. jpeg，有损，直接色，点阵图。不支持透明，压缩率较高。
+4. png-8，无损、索引色、点阵图。支持透明，不支持动画，压缩率较低。
+5. png-24，无损，直接色，点阵图。支持透明，压缩率较低。
+6. svg，无损、矢量图。
+7. webp，支持有损、无损，直接色，点阵图。支持透明，压缩率较高。
+8. heic，有损、无损，直接色，点阵图。支持透明，压缩率更高。
+
+## 判断浏览器是否支持 webp
+
+- 创建 image 对象，设置 src，判断是 onload 还是 onerror
+- canvas 判断，创建 canvas 对象，通过 canvas 的 toDataURL 设置为 webp 格式，判断返回值中是否含有 imgae/webp 字段，如果包含则支持 webP 反之不支持。
+
+## 什么是 Cookie 隔离？
+
+网站请求相同域名的静态资源会带上 cookie 信息，非常浪费资源。隔离操作：使用非主域名承载静态资源
+
+## style 标签卸载 body 前后
+
+页面加载自下而上先加载样式，写在前面使得首次加载即运用样式加载。卸载后面可能导致浏览器停止之前的加载触发重绘
+
+## 什么是 CSS 预处理、后处理器？
+
+CSS 预处理定义了一种新的语言，基本思想是，用一门专门的编程语言，为 CSS 增加一些编程特性。预处理器包括：LESS、Sass、Stylus，增强 css 代码的复用性和编程能力。
+
+CSS 后处理是对 CSS 进行处理，并最终生成 CSS 的预处理器。广义也是 CSS 预处理器。比如 PostCSS，能够在完成的样式表中根据 CSS 规范处理 CSS，让其更加有效。比如为浏览器添加私有前缀。
+
+## 阐述一下 CSSSprites
+
+将一个页面的所有图片包含到一张大图，利用 background-image 进行定位
+
+优点：
+
+- 减少 HTTP 请求数，加快页面加载速度
+- 增加信息重复度，提升压缩比
+- 更换风格方便
+
+缺点：
+
+- 图片合并麻烦
+- 维护不便
+- 不能进行渐进加载，浪费流量
+
+## rem 布局的优缺点？
+
+优点：
+
+- 便于移动端适配
+- 便于将 rem 和屏幕分辨率关联起来，实现整体缩放
+
+缺点：
+
+- 对于奇葩 dpr 的设备兼容性不好
+- iframe 引用会出现问题
+- 对于桌面端，无法展示更多的内容
+
+## 画一条 0.5px 的线
+
+- canvas，并设置次像素渲染模式
+- metaviewport
+- transform: scale()
+- border-image
+
+## transtion 和 animation 的区别
+
+- transition 关注 CSS 属性的变化
+- animation 作用于元素本身，可以使用关键帧
+
+## 什么是首选最小宽度？
+
+元素适合的最小宽度？东亚文字最小宽度为每个汉字的宽度；西方文字最小宽度为特定连续的英文字符的宽度。可以使用 word-break 来改变最小宽度。
+
+## 为什么 height: 100% 无效？
+
+对于普通文档流中的元素，百分比值想要起作用，父级必须有可以生效的高度值。如果包含块的高度没有显式指定，且元素非绝对定位，则计算值为高度，无法参与计算。
+
+## min-width/max-width 和 min-height/max-height 之间的覆盖规则
+
+- min-width 会覆盖 width，即使 width 设置了 !important
+- min-width 会覆盖 max-width，此规则会发生在 min-width 和 max-width 失效的时候
+
+## 什么是幽灵空白节点？
+
+在 HTML5 文档声明中，内联元素的所有解析和渲染就表现的如同每个行框盒子前面有一个空白节点一样。这个空白节点永远透明，不占据任何宽度，也无法看见，又确确实实的存在。
+
+## 什么是替换元素？
+
+通过修改某个属性值呈现的内容就可以被替换的元素称为替换元素。其特性为：
+
+1. 内容的外观不受页面上的 CSS 的影响
+2. 有自己的尺寸
+3. 在某些 CSS 属性上有一套自己的规则
+4. 所有的替换元素都是内联水平元素
+
+## 替换元素的计算规则
+
+三种尺寸：
+
+- 固有尺寸：替换内容原本的尺寸
+- HTML 尺寸：只能通过 HTML 原生属性改变，一遍能够表示渲染的像素
+- CSS 尺寸：特指可以通过 CSS 的 width 和 height 或者其它因素改变的尺寸，对应盒尺寸中的 contentbox
+
+计算规则：
+
+1. CSS 尺寸最高
+2. HTML 尺寸其次
+3. 固有尺寸最低
+4. 如果固有尺寸含有固定宽高比例，且仅仅设置单方向尺寸，则使用宽高比等比例缩放
+5. 如果都不符合，使用 300 * 150 像素表现
+
+## content 与替换元素的关系？
+
+content 属性生成的对象是匿名替换元素
+
+- 该文本无法选中，无法复制
+- 无法被阅读器读取，无法被 SEO（除非使用 aria-* ）等特殊方法
+- 不能使用 :empty 伪类
+- 动态生成值无法获取
+
+## margin: auto 的填充规则
+
+1. 如果一侧定值，一侧 auto，则 auto 为剩余空间大小
+2. 如果两侧均为 auto，则平分剩余空间
+
+## margin 无效的情景
+
+1. display: inline 的元素垂直 margin 无效
+2. `<tr>` 和 `<td>` 元素无效
+3. 绝对定位元素非定位方位的 margin 无效
+4. 定高容器的子元素的 margin-bottom 或者宽度定死的子元素 margin-right 的定位无效
+
+## 什么是基线和 x-height
+
+字母 x 的下边缘为基线，x-height 指的是消息字母 x 的高度，是字符纵向对齐的三等分线的等分单位；middle 指的是 baseline 向上 1/2x-height 的高度。ex 即为 x-height
+
+## line-height 的特殊性
+
+1. 对于非替换的纯内联元素，其可视高度由 line-height 决定。
+2. 内联元素的高度由固定部分和不固定高度组成，不固定指的是 line-height。该行距高度分布在文字的上方和下方。
+3. 行距等于 line-height - font-height
+4. border 和 line-height 等传统 CSS 属性无小数概念
+5. 对于纯文本元素，line-height 决定最终高度。如果同时有替换元素，则 line-height 决定最小高度
+6. 对于块状元素，line-height 没有任何作用
+7. 其默认值为 normal，百分比时是于 font-size 相乘后的值
+8. 如果数值作为 line-height 的值，则子元素会继承
+9. 无论内联元素 line-height 如何设置，最终父级元素的高度都由数值大的那个 line-height 决定
+
+## vertical-align 的特殊性
+
+1. 默认值为 baseline，文字对齐 x 下边缘，内联元素对齐下边缘。
+2. top 上边缘
+3. middle 中间
+4. 支持数值属性，是相对于 baseline 向上或者向下偏移
+5. 百分比相对于 line-height 计算得到
+6. 只能应用于内联元素以及 display 为 table-cell 的元素
+7. table-cell 元素设置 vertical-align 对齐的是子元素，但作用的是 table-cell 本身
+
+## overflow 的特殊性
+
+1. 设置了 overflow:hidden 的元素，假设同时存在 border 和 padding，则当子元素内容高度限制的时候，裁减的边界是 border-box 的内边缘，而非 paddingbox 的内边缘
+2. HTML 的根元素和文本框默认可以产生滚动条
+3. 滚动条会占用容器的可用宽度或者高度
+4. 元素设置了 overflow:hidden 声明，当内容高度溢出的时候，滚动依然存在，只是滚动条不存在
+
+## 无依赖绝对定位是什么？
+
+没有设置left/top/right/bottom属性值的绝对定位称为“无依赖绝对定位”。
+
+## absolute 和 overflow 的关系？
+
+1. 如果overflow不是定位元素，同时绝对定位元素和overflow容器之间也没有定位元素，则overflow无法对absolute
+元素进行剪裁。
+2. 如果overflow的属性值不是hidden而是auto或者scroll，即使绝对定位元素高宽比overflow元素高宽还要大，也都不会出现滚动条。
+3. overflow元素自身transform的时候，Chrome和Opera浏览器下的overflow剪裁是无效的。
+
+## clip 裁减是什么？
+
+最佳可访问性隐藏，内容肉眼不可见，但是其他辅助设备却能够进行识别和访问
+
+## relative 的特殊性？
+
+1. 相对定位元素的 left/top/right/bottom 百分比是相对于包含块计算的，而不是自身
+2. top 和 bottom 这两个垂直方向值时是相对高度计算的
+3. 当相对定位元素同时应用对立方向定位值的时候，也就是top/bottom和left/right同时使用的时候，只有一个方向的定位属性会起作用。而谁起作用则是与文档流的顺序有关的，默认的文档流是自上而下、从左往右，因此top/bottom同时使用的时候，bottom失效；left/right同时使用的时候，right失效。
+
+## 层叠相关？
+
+见 CSS 复习笔记
+
+## font-weight 的特殊性？
+
+具体数值必须是 100-900 之间的整百数
+
+## text-indent 的特殊性
+
+1. text-indent 仅对第一行内联盒子内容有效
+2. 非替换元素以外的 display 计算值为 inline 的内联元素设置 text-indent 值无效
+3. `<input>` 标签按钮text-indent值无效。
+4. `<button>` 标签按钮text-indent值有效。
+5. text-indent 的百分比值是相对于当前元素的“包含块”计算的，而不是当前元素。
+
+## letter-spacing 与字符间距
+
+letter-spacing可以用来控制字符之间的间距，这里说的“字符”包括英文字母、汉字以及空格等。
+
+letter-spacing具有以下一些特性。
+
+1. 继承性。
+2. 默认值是normal而不是0。虽然说正常情况下，normal的计算值就是0，但两者还是有差别的，在有些场景下，letter-spacing会调整normal的计算值以实现更好的版面布局。
+3. 支持负值，且值足够大的时候，会让字符形成重叠，甚至反向排列。
+4. 和text-indent属性一样，无论值多大或多小，第一行一定会保留至少一个字符。
+5. 支持小数值，即使0.1px也是支持的。
+6. 暂不支持百分比值。
+
+## word-spacing 与单词间距
+
+letter-spacing作用于所有字符，但word-spacing仅作用于空格字符。换句话说，word-spacing的作用就是增加空格的间隙宽度。
+
+## white-space 与换行和空格的控制？
+
+white-space属性声明了如何处理元素内的空白字符，这类空白字符包括Space（空格）键、Enter（回车）键、Tab（制表符）键产生的空白。因此，white-space可以决定图文内容是否在一行显示（回车空格是否生效），是否显示大段连续空白（空格是否生效）等。
+
+其属性值包括下面这些。
+
+- normal：合并空白字符和换行符。
+- pre：空白字符不合并，并且内容只在有换行符的地方换行。
+- nowrap：该值和normal一样会合并空白字符，但不允许文本环绕。
+- pre-wrap：空白字符不合并，并且内容只在有换行符的地方换行，同时允许文本环绕。
+- pre-line：合并空白字符，但只在有换行符的地方换行，允许文本环绕。
+
+## 隐藏元素的 background-image 加不加载？
+
+1. img 元素一定会加载
+2. 父元素隐藏导致的隐藏不加载，自身隐藏导致的隐藏加载
+
+## 如何实现单行、多行文本的溢出省略
+
+单行文本
+
+```css
+text-overflow: ellipsis;
+white-space: nowrap;
+overflow: hidden;
+```
+
+多行文本溢出
+
+```css
+p { 
+    overflow: hidden;
+    line-height: 1.5em;
+    height: 3em;
+}
+p: after {
+    content: "...",
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    background-color: #fff;
+}
+```
+
+## 常见的元素隐藏方式
+
+1. display: none 渲染树不渲染，不响应绑定的监听事件
+2. visibility: hidden 占据空间，不响应绑定的监听事件
+3. opacity: 0 占据空间，响应监听事件
+4. 绝对定位移除实现隐藏
+5. z-index 负值隐藏
+6. clip-path 隐藏，不响应监听事件
+7. transform: scale(0,0) 实现缩放，不响应绑定的监听事件
+
+## 输入 URL 到渲染完成
+
+域名解析-TCP分包-IP寻路-握手-滑动窗口传输-持久化连接-挥手-解析-构建dom树与cssom-构建渲染树-回流-重绘-渲染
+
+## 浏览器一个tab页卡住了，为什么其他tab没事 
+
+chrome 使用多个进程来隔离不同的网页，保证安全性、健壮性和响应速度，但也造成了内存较大的损失。
+
+## 浏览器有哪些线程
+
+- GUI 渲染线程：负责渲染界面的 HTML 元素，当页面回流或者重绘时，该线程会执行；在脚本执行期间，该线程挂起
+- JavaScript 引擎线程：负责处理 JS 脚本程序，例如 V8 引擎
+- 定时器触发线程：为保证计时的准确性
+- 事件触发线程：当一个事件触发时，该线程会把事件添加到待处理队列的队尾，等待 JS 引擎的处理。
+- 异步 HTTP 请求线程：在 XMLHttpRequest 连接后，浏览器新开一个线程请求，检测的状态变更后，如果设置有回调函数，异步线程就产生状态变更事件放到 JS 引擎的处理队列中等待处理
+
+## 大文件上传实现？
+
+基本思路：文件分块，每块计算 MD5，块向后端传输，后端返回 MD5，验证符合后表明该块传递成功，否则失败；整体传输完毕后，计算整体的 MD5，成功则成功，否则失败。
+
+断点续传：记录成功传递的块的 MD5，重新建立连接时，验证这些 MD5。验证失败的和未验证的重传。
+
+安全问题：避免过多上传导致服务器崩溃，可设置缓存队列、大小检查和超时时间，还可以由服务器给客户端发送 token 记录，客户端上交 token 记录。
+
+并发：多个异步任务即可，完成后修改计数。
+
+## HTTPS 安全问题
+
+```config
+Client                          Server
+  | ----> (1) Client Hello ---->   |
+  | <---- (2) Server Hello <----   |
+  | <---- (3) Certificate  <----   |
+  | <---- (4) Server Key Exchange  |
+  | ----- (5) Server Hello Done    |
+  | ----> (6) Client Key Exchange  |
+  ---------------------------------- Part. 1
+  | ----> (7) Change Cipher Spec   |
+  | ----> (8) Finish       ---->   |
+  | <---- (9) Change Cipher Spec   |
+  | <---- (10) Finish      -----   |
+  ---------------------------------- Part. 2
+        Shakehand Finish
+```
+
+1. 密钥交换与密钥协商：TLS1.3 会将制作密钥需要的材料预先发给服务器
+    1. Client Hello： 
+        - \[Version/Random/SessionId/Cipher Suite/Compression Method/Extensions\]
+    2. Server Hello: 
+        - \[Version/Random/SessionId/Cipher Suite/Compression Method（存在安全漏洞，在 TLS1.3 中被禁用）/Extensions\]
+    3. Certificate：服务器将证书发送给客户端
+    4. Server Key Exchange
+    5. Server Hello Done
+    6. 计算预主密钥，Client Key Exchange
+    7. 计算主密钥：对称加密算法中，相同的密钥的情况下，中间人可以通过对双方流量监听，获得明文（RC4 算法）；MAC 用于防止篡改
+        - 客户端写入加密密钥：客户端来加密数据，服务器来解密数据
+        - 服务器写入加密密钥：服务器来加密数据，客户端来解密数据
+        - 服务器写入 MAC 密钥：客户端创建 MAC，服务器用来验证 MAC
+        - 客户端写入 MAC 密钥：服务器创建 MAC，客户端用来验证 MAC
+2. 通信测试：服务器通过 Change Cipher Spec 报文通知服务器接下来的报文会用协商好的密码套件加密，然后将加密好的套件通过 Finish 发送给服务器。服务器接收验证数据，用密钥解密，先发送 Change Cipher Spec 报文通知客户端会用协商好的密码套件加密，然后将加密过的验证数据通过 Finish 报文传输给客户端。
+    1. TLS 会话复用：服务器将加密过的 SessionID 发给客户端，客户端发送的 SessionId 可以解密则可跳过协商阶段
+    2. 密码套件：
+        - 密钥交换协议：规定通信双方如何交换通信时使用的对称加密算法的密钥。影响 Server/Client Key Exchange
+        - 对称加密算法：规定双方通信时如何加密信息。影响通信测试和正常通信。
+        - 消息认证码算法：规定如何对内容进行哈希，生成 MAC。用于保证消息传输过程中不被篡改
+        - 伪随机算法：用于生成主密钥和相关密钥
+
+## RTT 问题？
+
+tcp 1.5 RTT
+tls 1.5 RTT/ tls1.3 1 RTT
+http 1 RTT
+
+http1.x = 2.5RTT
+https + http1.x  = 4RTT
+http2 = 队首 4RTT / 其它 1RTT（重用 TCP 连接，但有队首阻塞）
+http3/quic
+    - 页面整体加载时间 1RTT + 1RTT
+    - 重连时间 1RTT
+
+## React 面试题
+
+1. 类组件和函数组件之间的区别
+    - 类组件可以使用 state 和钩子等特性
+    - 函数式组件是建立 props 和页面渲染之间的映射的函数，也可以使用 hooks 接口实现部分上述功能
+2. React 中的 refs？
+    - 提供一种访问在 render 方法中创建的 DOM 节点或者其他 React 函数的方法。即这些元素的引用。
+3. React 中如何处理事件？
+    - 为了解决跨浏览器的兼容性问题，SyntheticEvent 实例被传递给事件处理函数，它是跨浏览器的事件包装器，拥有和浏览器原生事件相同的接口
+4. state 和 props 的区别？
+    - state 是组件自己管理的数据，控制自己的状态，可变
+    - props 是外部传入的数据参数，不可变
+5. 如何创建 refs？
+    - 类组件：
+        - 声明及初始化：`this.myRef = React.createRef();`
+        - 绑定： `<div ref={this.myRef}></div>`
+        - 函数绑定：`<div ref={this.input = input}></div>`
+    - 函数式组件及 hooks：
+        - 声明和初始化 `const ref = useRef(null);` 
+        - 函数绑定 `<div ref={(divRef)=>ref.current = divRef}></div>`
+        - 绑定 `<div ref={ref}></div>`
+6. 什么是高阶组件？
+    - 是接受并返回一个新组件的函数
+    - 可以动态接受任何提供的子组件，但不会修改或者复制输入组件中的任何行为
+7. 在构造函数调用 super 并将 props 作为参数传入的作用是？
+    - 在调用 super() 之前，子类构造函数无法使用 this 引用（ES6 知识）
+8. 什么是控制组件？
+    - React 在诸如表单元素等元素时，包含表单的组件将跟踪其状态的输入值，并在每次回调函数触发时重新渲染组件。以这种方式由 React 控制其值的输入表单元素称为控制组件
+9. React.createElement？
+    - 参数：
+        tag 或者组件名
+        选项
+        子节点
+10. 什么是 JSX？
+    - 新的语法糖，主要用于在 JavaScript 中直接加入 XML 内容，主要被 React 使用
+11. @TODO
+
+## 深拷贝
+
+@TODO
