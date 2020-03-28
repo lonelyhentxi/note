@@ -1,25 +1,8 @@
 # JS Interview
 
-## 用 JS 描述一棵树
+[TOC]
 
-```js
-// 二叉树
-class TreeNode {
-    constructor(value, left, right) {
-        this.value = value;
-        this.left = left;
-        this.right = right;
-    }
-}
-
-// 多叉树
-class TreeNode {
-    constructor(value) {
-        this.value = value;
-        this.children = [];
-    }
-}
-```
+# JS
 
 ## 非递归遍历树
 
@@ -27,7 +10,7 @@ class TreeNode {
 
 ## Js New 操作
 
-新建一个对象，将调用函数的 this 指向新建的这个对象
+新建一个空的简单 JS 对象，将构造函数指向该对象，将调用函数的 this 指向新建的这个对象，调用构造函数，如果返回值为对象，返回该返回值，否则返回 this
 
 ## 方法调用 this 指向
 
@@ -38,342 +21,6 @@ class TreeNode {
 ## 什么是 JS 闭包
 
 创建函数式，捕获创建的外围词法作用域的对象的值（基本值类型）和引用（对象），从而可以从内部函数访问外围函数作用域。
-
-## 跨域访问
-
-当一个资源从与该资源本身所在不同的域、协议或者端口请求一个资源时，称为跨域访问。
-
-## Vue 的父子组件之间的通信方式
-
-1. 父组件向子组件 props，单向数据流
-2. 子组件向父组件 emit event, 事件
-
-children:
-
-```vue
-props: {
-    msg: {
-        type: String,
-        default: () => {
-            return ' ';
-        }
-    }
-},
-methods: {
-    say() {
-        this.$emit('say', this.data1);
-    }
-}
-```
-
-parent:
-
-```vue
-<children :msg=msg @say=parentSay>
-```
-
-
-此外父组件可以通过子组件的 refs 触发子组件的事件，还可以使用 VueX 和自己写总线的方式进行沟通。
-
-```vue
-<children ref="childrenRef"></children>
-//...
-this.$refs.childrenRef.func()
-```
-
-## 用 CSS 写无限循环动画
-
-```css
-@keyframes example {
-    from { background: red; }
-    to { background: blue; }
-}
-
-#example1 {
-    width: 10px;
-    height: 10px;
-    animation-timing-function: ease-in;
-    animation-name: example;
-    animation-duration: 1s;
-    animation-iteration-count: infinite;
-}
-```
-
-## 如何响应式布局
-
-- 媒体查询
-    - 设置 viewport
-    - 选择屏幕大小分割点
-    - 针对不同的范围和类型的设备，复用部分资源，设置不同的网页
-- 百分比布局
-    - 计算困难
-    - 复杂：position 类型，元素类型和属性类型都可能造成负面影响，有副作用
-- rem 布局
-    - 思想：
-        1. 一般不给元素设置具体的宽度
-        2. 高度可以按照设计图固定值设计
-        3. 所有设置固定的时候用 rem 做单位
-        4. JS 设置真实屏幕的宽度，除以设计稿的宽度，作出比例
-    - 缺点：
-        1. 必须通过 JS 来动态控制根 font-size 大小，存在 JS 和 CSS 的耦合性
-- 视口单位：
-    - 思想：使用 vm 和 vh，vmin 和 vmax 来布局
-- 图片响应式
-    - srcset/src
-    - background-image
-    - picture
-- 成型方案：
-    - flex
-    - grid
-    - columns
-
-## 清除 float
-
-1. 添加新元素，应用 clear: both
-2. 父级 div 定义 overflow: auto 或者 hidden（根据 BFC 的规则，计算 BFC 高度时，浮动也参与计算）
-3. 使用 :after 伪类
-
-```css
-.clear{clear:both; height: 0; line-height: 0; font-size: 0}
-```
-
-```css
-.outer::after {
-    clear: both;
-    content: '';
-    display: block;
-    width: 0;
-    height: 0;
-    visibility: hidden;
-}
-```
-
-## 模拟 call
-
-假设为浏览器，非严格模式：
-
-```js
-Function.prototype.myCall = function(context, ...args) {
-    context = (context??window) || new Object(context);
-    const key = Symbol();
-    context[key] = this;
-    const result = context[key](...args);
-    delete context[key];
-    return result; 
-}
-```
-
-非浏览器，则 window 改为 global；严格模式，context 不需要判断和 new Object 转换，而在下文调用时注意判断 null 的情况；
-
-## 模拟 apply
-
-假设为浏览器，非严格模式：
-
-```js
-Function.prototype.myApply = function(context, args) {
-    context = (context??window) || new Object(context);
-    const key = Symbol();
-    context[key] = this;
-    args = args ? args: [];
-    // 应对类数组对象
-    if(!(args instanceof Array)){
-        const newArgs = [];
-        for(let i=0;i<args.length;i++) {
-            newArgs.push(args[i]);
-        }
-        args = newArgs;
-    }
-    const result = context[key](...args);
-    delete context[key];
-    return result;
-}
-```
-
-非浏览器和严格模式见上文
-
-## 模拟 bind
-
-假设为浏览器，非严格模式：
-
-```js
-Function.propotype.myBind  = function(context, ...args) {
-    const fn = this;
-    const bindFn = function(...newFnArgs) {
-        return fn.call(
-            // 应对被当做构造函数使用
-            this instanceof bindFn ? this : context,
-            , ...args, ...newFnArgs)
-    }
-    bindFn.prototype = Object.create(fn.prototype);
-    return bindFn;
-}
-```
-
-## 模拟 new
-
-假设为非严格模式：
-
-```js
-const createNew = (Con, ...args) => {
-    const obj = {};
-    Object.setPrototypeOf(obj, Con.prototype);
-    const result = Con.apply(obj, args);
-    return result instanceof Object ? result : obj;
-}
-```
-
-## 模拟 instanceof
-
-```js
-const myInstanceOf = (left, right) => {
-    let leftValue = Object.getPrototypeOf(left);
-    let rightValue = Object.prototype;
-    // Object.prototype === null
-    while(true) {
-        if(leftValue===null) {
-            return false;
-        }
-        if(leftValue===rightValue) {
-            return true;
-        }
-        leftValue = Object.getPrototypeOf(leftValue);
-    }
-}
-```
-
-## 手写 AJAX
-
-```js
-function formateData(data) {
-    const arr = [];
-    for(let key in data) {
-        arr.push(`${encodeURIComponent(key)}=${data[key]}`);
-    }
-    return arr.join('&');
-}
-
-function ajax(params) {
-    params = params || {};
-    params.data = params.data || {};
-    params.type = (params.type || 'GET').toUpperCase();
-    params.data = formateData(params.data);
-    const xhr = new XMLHttpRequest();
-    return new Promise((resolve, reject)=>{
-        xhr.onload = function() {
-            if(xhr.status===200 || xhr===304 || xhr.status===206) {
-                const res = JSON.parse(xhr.responseText);
-                if(params.success && params.success instanceof Function) {
-                    params.success.call(xhr, res);
-                }
-                resolve(res);
-            } else {
-                const res = JSON.parse(xhr.responseText);
-                if(params.error && params.error instanceof Function) {
-                    params.error.call(xhr, res);
-                }
-                reject(res);
-            }
-    }
-    })
-    if(params.type==='GET') {
-        xhr.open(params.type, `${params.url}?${params.data}`, true);
-        xhr.send();
-    }
-    else if(params.type==='POST') {
-        xhr.open(params.type, params.url, true);
-        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-        xhr.send(params.data);
-    }
-}
-```
-
-## 手写 JSONP
-
-```js 
-function formateData(data) {
-    const arr = [];
-        for (let key in data) {
-        arr.push(encodeURIComponent(key) + '=' + encodeURIComponent(data[key]))
-    }
-    return arr.join('&');
-}
-
-function jsonp(params) {
-    params = params || {};
-    params.data = params.data || {};
-    const callbackName = params.jsonp;
-    const head = document.querySelector('head');
-    const script = document.createElement('script');
-    params.data['callback'] = callbackName;
-    const data = formateData(params.data);
-    script.src = `${params.url}?${data}`;
-    window[callbackName] = (jsonData) => {
-        head.removeChild(script);
-        clearTimeout(script.timer);
-        delete window[callbackName];
-        params.success && params.success(jsonData);
-    }
-    if(params.time) {
-        script.timer = setTimeout(()=>{
-            window[callbackName] = null;
-            header.removeChild(script);
-            params.error && params.error({
-                message: 'time out'
-            });
-        }, params.time);
-    }
-    head.appendChild(script);
-}
-```
-
-## 为什么禁止跨域
-
-- 使用 drawImage 等 canvas 绘制函数、以及 WebGL 贴图，可能存在攻击的风险：img、video 等方式访问第三方网页，会带上 cookie
-- 使用 XMLHttpRequest 和 Fetch 存在攻击的风险：XSS、CSRF
-- 使用 Web 字体，存在攻击的风险：二进制攻击和 CDN 滥用
-- 使用 iframe，存在攻击的风险：ClickJacking - 利用嵌入到你的文档或者将你的文档嵌入它的文档，以 iframe 的形式
-- 本地数据访问 - Cookie、Storage、indexDB
-
-## OSI 七层
-
-1. 物理层：建立、维护和断开物理连接
-2. 数据链路层：建立逻辑连接、硬件寻址、差错检验
-3. 网络层：端到端逻辑地址寻址，实现不同网络之间的路径选择
-4. 传输层：端口到端口的数据传输，可能有流控、数据校验等其他功能
-5. 会话层：建立、管理和终止会话
-6. 表示层：数据的标识、安全和压缩
-7. 应用层：网络服务于用户的接口
-
-## TCP 三次握手、四次挥手
-
-### 三次握手
-
-LISTEN -> SYSSENT -> ESTAB
-LISTEN -> SYN RCVD ->ESTAB
-
-1. Client -> Server SYN, seq=x：客户端发送网络包，服务器收到；服务端确认客户端发送能力和服务端接收能力
-2. Server -> Client SYN + ACK, ack=x+1, seq=y：服务端发送网络报，客户端收到；客户端确认自己的发送能力、服务器接收能力、服务器发送能力、客户端接收能力
-3. Client -> Server ACK, ack=y+1, seq=x+n：客户端发送网络报，服务器收到；服务端确认服务端发送能力和客户端接收能力
-
-服务端第一次收到 SYN 后，就会处于 SYN_RCVD 状态，称为半连接状态；若发送完 SYN-ACK 包，未收到回复，会指数重传，若超出最大重传次数，将会将半连接队列中删除。初始序号 ISN 会通过一定算法（计数器）随机选择，动态生成，避免攻击。第一次不发送数据，避免攻击。
-
-SYN 攻击是发送很多 SYN，使得正常的 SYN 的半连接队列因为已满而被丢弃，防御方法为：
-
-- 缩短 SYN Timeout 世间
-- 增大最大半连接数
-- 过滤网关防护
-
-### 四次挥手
-
-客户端 ESTAB -> FIN_WAIT_1 -> FIN_WAIT_2 -> TIMED_WAIT -> CLOSED
-服务端 ESTAB -> CLOSE_WAIT -> LAST_ACK -> CLOSED
-
-1. Client -> Server FIN, seq=x：客户端发送一个网络包，服务器收到，确认第 x 个包结束
-2. Server -> Client ACK, ACKnum = x+1：服务端发送一个网络包，客户端收到，确认第 x 个包已经被服务器收到
-3. Server -> Client FIN, seq=y：服务端发送一个网络包，客户端收到，确认第 y 个包收到
-4. Client -> Server ACK ACKnum = y+1: 客户端发送一个网络包，服务器收到，确认客户端第 y 个包收到，同意断开，此时客户端要等待计时器设置的 2MSL （报文段最大生存时间）后才进入 CLOSED 状态，等待服务器未收到确认的重传，同时防止下一个连接中不会出现这种就得请求报文段
-
-两方都要通知对方自己已经结束需要断开，并等待对方同意
 
 ## setTimeout 在单线程的 JS 里异步执行
 
@@ -402,47 +49,482 @@ SYN 攻击是发送很多 SYN，使得正常的 SYN 的半连接队列因为已�
 
 var 是函数作用域, 不允许变量提升，不存在死区；let、const 是词法作用域，不允许变量提升，存在死区，不允许重复声明
 
-## 进程和线程的区别
-
-进程是包含独立资源上下文的 CPU 工作时间单位，线程是共享进程资源上下文的 CPU 工作时间单位。
-
 ## JS 绑定新对象
 
 bind, apply, call
 
-## 手写快排
+## ES5 和 ES6 中的作用域和闭包
+
+ES5 的 var，全局和函数级
+ES6 词法块级作用域
+函数化的闭包，实现为对值对象获取其当时值快照、引用对象获取引用指针保存在创建的匿名对象中，通过类似 operator() 的方法予以调用
+
+### This 的指向
+
+谁调用 this，this 就指向谁
+
+- 全局
+    - 浏览器 window
+    - node {}
+- new
+    - 返回对象，指向该对象
+    - 返回其它，指向新对象
+- call，apply，bind
+    - 严格模式下，绑定传入的参数
+    - 非严格模式下
+        - 若为空，指向全局对象
+        - 若为值对象，返回对应的应用对象
+        - 其它，为传入的参数
+- 方法调用，调用位置上下文的对象
+- lambda，外层上下文绑定的 this 
+
+## JS 基本对象
+
+- Boolean
+- String
+- Null
+- Undefined
+- Symbol
+- BigInt
+- Object
+
+**typeof null==='object' JS 最初版本在 32 位环境中，性能考虑，低位存储类型，000 开头表示对象，null 全零，错误判断为 object**
+
+## 说一说对 JS 执行上下文栈和作用域链的理解
+
+JS 执行上下文就是 JavaScript 代码被解析和执行时所在环境的抽象概念，执行上下文分为：
+
+- 全局执行上下文
+- 函数执行上下文
+- eval 函数执行上下文
+
+创建过程：
+
+1. 创建变量对象：初始化 arguments，提升函数声明和变量声明
+2. 创建作用域链：在执行上下文的创建阶段，作用域链在变量创建后创建
+3. 确定 this 的值
+
+其栈即为函数调用栈。
+
+作用域负责收集和维护所有声明的标识符（变量）组成的一系列查询，并实施一套严格的规则，确定当前执行的代码对这些标识符的访问权限，JS 使用词法作用域。其作用域链为逐层向外。
+
+## setTimeout 倒计时误差
+
+加入宏队列需要时间，计时到达后等待主线程任务完成需要时间
+方法：从服务器或者 ntp 获取时间，修正计时器
+
+
+
+## 可迭代对象的特点
+
+有 `[Symbol.iterator]` 接口返回一个遍历器对象，可以使用 next() 函数获取 value 和 done，可以使用 for ... of 进行循环
+
+### 自定义迭代器对象
 
 ```js
-function partition(arr, l, r) {
-    const pivot = arr[l];
-    while(l<r) {
-        while(arr[r] >= pivot && l < r) {
-            r--;
-        }
-        if(l<r) {
-            arr[l] = arr[r];
-            l++;
-        }
-        while(arr[l] <= temp && l < r) {
-            l++;
-        }
-        if(l<r) {
-            arr[r] = arr[l];
-            r--;
-        }
-    }
-    arr[l] = pivot;
-    return l;
-}
-
-function quickSort(arr, l, r) {
-    if(l<r) {
-        const boundary = partition(arr, l, r);
-        quickSort(arr, l, boundary);
-        quickSort(arr, boundary + 1, r);
-    }
+*fn() {
+    yield xxx
 }
 ```
+
+使用生成器可以自定义迭代器对象
+
+### 异步迭代器
+
+有 `[Symbol.asyncIterator]` 接口返回一个遍历器对象，可以使用 next() 获取 value 和 done 的 promise，可以使用 for await ... of 循环
+
+异步生成器
+
+```js
+async function* fn() {
+    yield await xxx;
+}
+```
+
+## 原型链继承的思路和优缺点
+
+调用方法和属性时，如果没找到会顺着原型链向上查找，实现某种程度的继承
+
+优点：
+
+1. 单继承
+2. 可以像超类传递参数
+3. 解决引用值共享问题
+4. 可以动态修改原型链
+
+缺点：
+
+1. 单继承
+2. 查找耗时
+
+## 组合继承的思路和优缺点
+
+将原型链和借用构造函数结合到一起，通过原型链实现对原型属性和方法的继承，通过借用构造函数实现对实例属性的继承
+
+优点：
+
+1. 每个子类可有自己的属性
+2. 可向超类传递参数
+3. 可函数复用
+
+缺点：
+
+1. 调用两次构造函数
+
+```js
+function SuperType(name) {
+    this.name = name;
+    this.colors = ["red", "blue", "green"];
+}
+
+SuperType.prototype.sayName = function() {
+    alert(this.name);
+}
+
+function SubType(name, age) {
+    SuperType.call(this, name); // 第二次调用 SuperType()
+    this.age = age;
+}
+
+SuperType.prototype = new SuperType(); // 第一次调用 SuperType()
+SubType.prototype.sayAge = function() {
+    alert(this.age);
+}
+```
+
+## 原型式继承
+
+通过已有对象创建新对象，不必创建自定义类型，ES6 中可以使用 Object.create(proto) 来创建
+
+优点：
+
+1. 借助已有对象创建新对象，不必创建自定义类型
+
+缺点：
+
+1. 包含引用类型的属性会被所有实例共享
+
+## 寄生式继承
+
+类似工厂模式
+
+优点：
+
+1. 考虑对象而不是自定义类型和构造函数，很有用
+
+缺点：
+
+1. 不能函数复用
+2. 包含引用类型只的属性会被所有实例共享
+
+```js
+function object(o) {
+    function F(){}
+    F.prototype = o;
+    return new F();
+}
+
+function createAnother(original) {
+    // 通过调用函数创建一个新对象
+    var clone = object(original);  
+    // 以某种方式来增强这个对象
+    clone.sayHi = function() {
+        alert("hi");
+    }
+
+    return clone;
+}
+```
+
+## 寄生组合式继承
+
+原型链继承方法，借用构造函数继承属性
+
+优点：
+
+只调用一次超类构造函数
+原型链不变
+
+```js
+function inheritPrototype(subType, superType) {
+    var prototype = object(superType.prototype); // 创建对象
+    prototype.constructor = subType; // 增强对象
+    subType.prototype = prototype; // 指定对象
+}
+
+function SuperType(name) {
+    this.name = name;
+    this.colors = ["red", "blue", "green"];
+}
+
+SuperType.prototype.sayName = function() {
+    alert(this.name);
+}
+
+function SubType(name, age) {
+    SuperType.call(this, name);
+
+    this.age = age;
+}
+
+inheritPrototype(SubType, SuperType);
+
+SubType.prototype.sayAge = function( {
+    alert(this.age);
+})
+```
+
+## ES6 继承
+
+通过 extends 关键字实现：
+
+```js
+console.log(typeof SuperType);//function
+console.log(SuperType === SuperType.prototype.constructor); //true
+```
+
+类内方法默认不可枚举，而 ES5 可枚举；class 不能不加 new 直接调用；子类继承必须使用 super 方法，否则报错；使用 super 后才能使用 this 关键字
+
+## ES6 模块和 CommonJS 模块的差异
+
+1. 运行时和编译时
+    - CommonJS 模块运行时加载，import 是静态加载，编译时确定模块依赖关系；注意有 import() 是动态的
+    - CommonJS 加载的是对象，该对象在脚本运行完成才会生成
+2. CommonJS 输出的是值的拷贝，ES6 输出的是值的只读引用
+3. ES6 模块自动使用严格模式
+4. require 可以做动态加载，import 语句（非import函数）做不到
+6. 使用 require 加载某个模块时，就会运行整个模块的代码
+7. 当使用 require 命令加载同一个模块时，会使用缓存，除非删除缓存，否则不会得到新值
+
+ps: export default 可以理解为将变量赋值给 default，最后导出 default
+
+## 如何让 Promise.all 在抛出异常后仍然有效
+
+给每个作为参数的 promise 实例添加 catch 方法，则其在抛出异常并经过 catch 处理后会转换为 fullfilled 状态
+
+```js
+const tasks = promises.map(p=>Promise.resolve(p).catch(e=>e));
+Promise.all(tasks) //...
+```
+
+## Promise如何满足多个异步进程的同步顺序
+
+1. then 链式调用，若前一个回调函数返回的是 promise 对象，则后一个回调会等待该 promise 对象的状态发生变化，后者才会被调用
+2. async await 语法糖
+
+## Promise 的状态
+
+pending、fullfilled、rejected
+
+## 对 Object.defineProperty 的理解
+
+Object.defineProperty(obj, prop, descriptor) 会在对象上定义新属性，或者修改一个对象的现有属性，返回该对象
+
+- obj 要定义属性的对象
+- prop 要定义或者修改属性的名称
+- descriptor 要被定义或者修改的属性描述符
+
+descriptor 属性描述符的形式：数据描述符、存取描述符，描述只能是两者之一
+
+共同特性：
+
+- configurable 可设置性，能否被删除；除了 value 和 writable 之外的属性能否被修改，默认为 false； 能否修改为访问器属性
+- enumerable 能否在 for...in 循环和 Object.keys() 中被枚举，默认为 false
+
+数据描述符：
+
+- value 该属性对应的值，可以是任何有效的 JS 值，默认为 undefined
+- writable 当且仅当该属性的 writable 为 true 时，value 才能被复制运算符改变，默认为 false
+
+存取描述符：
+
+- get 一个给属性提供 getter 的方法，如果没有 getter 则为 undefined。当访问该属性时，该方法被执行。方法执行时，只有 this 可用，无参数。默认为 undefined
+- set 一个给属性提供 setter 的方法，如果没有 setter 则为 undefined。当属性值修改时，触发执行该方法。将接受 = 后的值为参数。默认为 undefined
+
+## 对 Proxy 的理解？
+
+proxy 对象用于定义基本操作的自定义行为，如属性查找、赋值、枚举、函数调用等。相当于拦截并修改某些操作的默认行为。使用方法为 `const proxy = new Proxy(target, handler)`，其中：
+
+- target 是用 proxy 包装的目标对象
+- handler 是一个对象，其属性是当执行一个操作时，定义代理的行为的函数，也就是自定义行为；handler 可以为 {} 但是不能为 null，否则会报错
+
+proxy 的操作，其中 receiver 代表在原型链上最初被调用的对象, newTarget 表示最初被调用的构造函数
+
+- get(target, property, receiver) => getter
+- set(target, property, value, receiver) => setter
+- has(target, property) => in
+- getPrototypeOf(target) => getPrototypeOf
+- setPrototypeOf(target, prototype) => setPrototypeOf
+- isExtensible(target) => Object.isExtensible Reflect.isExtensible（必须是对象，否则报错）
+- preventExtensions(target) => Object.preventExtensions Reflect.preventExtensions
+- getOwnPropertyDescriptor(target, prop) => Object/Reflect.getOwnPropertyDescriptor
+- deleteProperty(target, property) => delete obj.prop, Reflect.deleteProperty
+- constructor(target, argumentsList, newTarget) => Reflect.construct new proxy(...args)
+- ownKeys(target) => Reflect.ownKeys Object.keys Object.getOwnPropertySymbols Object.getOwnPropertyNames
+- apply(target, thisArg, argumentsList) => proxy(...args) Function.prototype.apply Function.prototype.call Reflect.apply
+
+## Object.defineProperty 和 Proxy 的区别
+
+Object.defineProperty
+
+- 不能监听数组 length 的变化，因为它的 configurable 为 false
+- 不能监听对象的添加和删除
+- 只能劫持对象的属性
+
+Proxy
+
+- 可代理整个对象
+- 多达 13 种操作
+
+## js 哈希存储结构的构成方式 ?
+
+hash 常用构造方法：
+
+1. 直接地址法
+2. 除数留余法
+3. 数字分析法
+4. 平方求和法
+5. 分段求和法
+
+哈希冲突的解决方法：
+
+1. 开放定址法：可能造成二次聚集，装填因子较小
+    - 线性探测再散列
+    - 二次探测再散列
+    - 伪随机探测再散列
+2. 再 hash 法：增加了计算时间
+3. 链地址法：处理简单，无堆积；适用于无法确定表长，各节点动态申请，适合于造表前无法确定表长；需要额外空间
+4. 公共溢出区
+
+Map、Set、WeakSet、WeakMap 小于八个线性查找，多于之后变成 hashmap。在 V8 中，散列码是一个随机数，与对象无关，不能重新计算它。对于将 JS 对象作为 key 的情况，V8 将哈希码作为私有对象存储在对象上。V8 的私有符号和 Symbol 类似，但是不可枚举，只能在 V8 内部使用。
+
+- 当属性存储是空的时候，可以直接在 JSObject 的偏移量上存储 hashcode
+- 当属性存储是数组：
+    - 最低有效位是指针标志位，其余 31 位表示实际整数值，最大小于 2^31 的整数在 JS 上更加高效；- 通常数组将长度存储为 SmallInteger ，因此最大长度为 10 比特即可表示，可以使用剩下的 21 位来存储 hashcode
+- 当属性是字典：将字典大小增加一个字，以便将哈希吗存储在字典起始位置的专用槽中
+
+# 浏览器 & WebAPI
+
+## 输入 URL 到渲染完成
+
+域名解析-TCP分包-IP寻路-握手-滑动窗口传输-持久化连接-挥手-解析-构建dom树与cssom-构建渲染树-回流-重绘-渲染
+
+## 重绘和重排
+
+### 渲染过程
+
+1. DOM Tree -> Render Tree
+2. Style struct -> Render Tree
+3. Render Tree -> Paint
+
+浏览器解析 HTML 源码，创建 DOM 树，每个 HTML 标签在树上都有一个对应的节点；标签中的文本也有对应的文本节点；DOM 树上根节点式 documentElement；浏览器解析 CSS；合并创建渲染树，类似 DOM 树，但并不一一对应；渲染树上的节点使用对应的格式化上下文进行渲染。一旦渲染树被创建成功，浏览器就可以在屏幕上绘制渲染树节点。
+
+### 重绘和重排
+
+在第一次排列和绘制之后，每次改变用于构建渲染树的信息都会导致至少：
+
+- 部分渲染树的节点尺寸需要重新计算 —— 重排
+- 由于节点几何属性或者样式发生改变，更新屏幕内容 —— 重绘
+
+这些操作代价高昂
+
+### 触发的场景
+
+1. 无格式化上下文几何变化的变化 -> 重排和重绘
+2. 单纯样式变化 -> 重绘
+
+### 浏览器的优化
+
+创造变化队列，在一定时间内同种可覆盖变化会发生覆盖；但在可能需要几何信息的情况下会立即触发变化，可以先缓存值
+
+### 最小化重排和重绘
+
+- 不要逐个改变样式
+- 离线的批量改变和表现 DOM
+- 通过 documentFragment 来保留临时改动
+- 通过复制改变替换的方式
+- 通过 display: none 属性隐藏元素，添加足够多的变化后，再显示
+- 不频繁计算样式，如果有需要，可以缓存
+
+## 浏览器一个tab页卡住了，为什么其他tab没事 
+
+chrome 使用多个进程来隔离不同的网页，保证安全性、健壮性和响应速度，但也造成了内存较大的损失。
+
+## 浏览器有哪些线程
+
+- GUI 渲染线程：负责渲染界面的 HTML 元素，当页面回流或者重绘时，该线程会执行；在脚本执行期间，该线程挂起
+- JavaScript 引擎线程：负责处理 JS 脚本程序，例如 V8 引擎
+- 定时器触发线程：为保证计时的准确性
+- 事件触发线程：当一个事件触发时，该线程会把事件添加到待处理队列的队尾，等待 JS 引擎的处理。
+- 异步 HTTP 请求线程：在 XMLHttpRequest 连接后，浏览器新开一个线程请求，检测的状态变更后，如果设置有回调函数，异步线程就产生状态变更事件放到 JS 引擎的处理队列中等待处理
+
+## png、jpg、gif、webp、heic、bmp 等图片的使用
+
+1. bmp 无损，支持索引色和直接色的点阵图。几乎没有压缩数据。
+2. gif 无损，索引色，点阵图。LZW 算法，支持透明，大小小，色彩素质低，支持动图。
+3. jpeg，有损，直接色，点阵图。不支持透明，压缩率较高。
+4. png-8，无损、索引色、点阵图。支持透明，不支持动画，压缩率较低。
+5. png-24，无损，直接色，点阵图。支持透明，压缩率较低。
+6. svg，无损、矢量图。
+7. webp，支持有损、无损，直接色，点阵图。支持透明，压缩率较高。
+8. heic，有损、无损，直接色，点阵图。支持透明，压缩率更高。
+
+## 判断浏览器是否支持 webp
+
+- 创建 image 对象，设置 src，判断是 onload 还是 onerror
+- canvas 判断，创建 canvas 对象，通过 canvas 的 toDataURL 设置为 webp 格式，判断返回值中是否含有 imgae/webp 字段，如果包含则支持 webP 反之不支持。
+
+## 什么是 Cookie 隔离？
+
+网站请求相同域名的静态资源会带上 cookie 信息，非常浪费资源。隔离操作：使用非主域名承载静态资源
+
+## 移动端的点击事件延迟 300 毫秒？
+
+判断用户是否再次点击屏幕
+
+## cookie 和 session 的区别
+
+cookie 是客户端中保存少量信息的机制，用于记录用户的信息，也是实现 session 的一种方法
+
+session 是开发者为了实现中断和继续等操作，将 user agent 和 service 之间的交互，抽象为的会话及其会话状态。常见实现方式为，服务端中保存的数据结构，用来记录用户的状态，也可以通过 JWT 的方式实现
+
+## 浏览器的事件代理机制的原因是？
+
+事件流：DOM2 级事件将事件流分为是三个阶段，捕获阶段、目标阶段、冒泡阶段
+
+事件代理机制的原理：在祖先 DOM 绑定一个元素，当触发子孙级 DOM 元素的事件时，利用事件冒泡的原理来触发绑定在祖先级 DOM 的事件，一层层冒泡到 document 对象
+
+事件代理的原因：
+
+1. 减少实际添加到网页上的事件，维护性能
+2. 事件代理时，子孙动态，不需要为新添加的子孙绑定事件
+3. 子孙移除后，不需要手动清理事件
+4. 允许一个事件注册多个监听
+5. 提供更精细的手段控制 listener 的触发阶段
+6. 对任何 DOM 有效，而不仅仅是 HTML
+
+addEventListener:
+
+```js
+target.addEventListener(type, listener[, options]);
+target.addEventListener(type, listener[, useCapture]);
+```
+
+options 对象
+
+- capture：true 表示在捕获阶段触发，否则在冒泡阶段触发
+- once: 在添加后调用一次，后自动移除
+- passive: 永远不应该调用 preventDefault() 如果调用，则会忽略并得到控制台警告
+
+## 浏览器里除了 js 还能运行什么
+
+webassembly
+
+# 网络 & 安全
+
+## 同源的定义
+
+同协议，同抽象主机，同端口号
 
 ## http 状态码
 
@@ -494,316 +576,242 @@ function quickSort(arr, l, r) {
 503 Service Unavailable 服务器没有准备好请求，可能是服务器在维护或者重载而停机
 504 Gateway Timeout 网关服务器不能及时得到相应
 
-## 死锁的四要素和定义
+## HTTPS 安全问题
 
-死锁定义：两个或者以上的进程在执行过程中，因资源争夺而造成的互相等待的现象，若无外力作用，无法继续推进。
-
-死锁原因：
-
-1. 系统资源不足
-2. 请求顺序不适当
-3. 资源分配不当
-
-四要素：
-
-1. 循环等待
-2. 请求并保持
-3. 互斥资源
-4. 不可剥夺
-
-死锁的解除和预防：
-
-1. 预防
-    - 优先级
-    - 尝试获取的超时
-    - 可抢占
-    - 可共享资源不要设置为互斥
-2. 避免
-    - 进程启动拒绝
-    - 资源分配拒绝
-3. 解除
-    - 剥夺资源
-    - 撤销进程
-
-## 同源的定义
-
-同协议，同抽象主机，同端口号
-
-## cookie 和 session 的区别
-
-cookie 是客户端中保存少量信息的机制，用于记录用户的信息，也是实现 session 的一种方法
-
-session 是开发者为了实现中断和继续等操作，将 user agent 和 service 之间的交互，抽象为的会话及其会话状态。常见实现方式为，服务端中保存的数据结构，用来记录用户的状态，也可以通过 JWT 的方式实现
-
-## ES5 和 ES6 中的作用域和闭包
-
-ES5 的 var，全局和函数级
-ES6 词法块级作用域
-函数化的闭包，实现为对值对象获取其当时值快照、引用对象获取引用指针保存在创建的匿名对象中，通过类似 operator() 的方法予以调用
-
-## Promise.all 用法和实现
-
-Promise.all(PromiseArray).then() 等待全部任务完成后执行，或者出现第一个失败
-
-```js
-function myPromiseAll(arr) {
-    return new Promise((resolve, reject)=>{
-        const result = new Array(arr.length);
-        arr.forEach((p, index)=>{
-            Promise.resolve(p).then(d=>{
-                result[index] = d;
-                count ++;
-                if(count===arr.length) {
-                    resolve(result);
-                }
-            }, err=> reject(err));
-        });
-    });
-}
+```config
+Client                          Server
+  | ----> (1) Client Hello ---->   |
+  | <---- (2) Server Hello <----   |
+  | <---- (3) Certificate  <----   |
+  | <---- (4) Server Key Exchange  |
+  | ----- (5) Server Hello Done    |
+  | ----> (6) Client Key Exchange  |
+  ---------------------------------- Part. 1
+  | ----> (7) Change Cipher Spec   |
+  | ----> (8) Finish       ---->   |
+  | <---- (9) Change Cipher Spec   |
+  | <---- (10) Finish      -----   |
+  ---------------------------------- Part. 2
+        Shakehand Finish
 ```
 
-### This 的指向
+1. 密钥交换与密钥协商：TLS1.3 会将制作密钥需要的材料预先发给服务器
+    1. Client Hello： 
+        - \[Version/Random/SessionId/Cipher Suite/Compression Method/Extensions\]
+    2. Server Hello: 
+        - \[Version/Random/SessionId/Cipher Suite/Compression Method（存在安全漏洞，在 TLS1.3 中被禁用）/Extensions\]
+    3. Certificate：服务器将证书发送给客户端
+    4. Server Key Exchange
+    5. Server Hello Done
+    6. 计算预主密钥，Client Key Exchange
+    7. 计算主密钥：对称加密算法中，相同的密钥的情况下，中间人可以通过对双方流量监听，获得明文（RC4 算法）；MAC 用于防止篡改
+        - 客户端写入加密密钥：客户端来加密数据，服务器来解密数据
+        - 服务器写入加密密钥：服务器来加密数据，客户端来解密数据
+        - 服务器写入 MAC 密钥：客户端创建 MAC，服务器用来验证 MAC
+        - 客户端写入 MAC 密钥：服务器创建 MAC，客户端用来验证 MAC
+2. 通信测试：服务器通过 Change Cipher Spec 报文通知服务器接下来的报文会用协商好的密码套件加密，然后将加密好的套件通过 Finish 发送给服务器。服务器接收验证数据，用密钥解密，先发送 Change Cipher Spec 报文通知客户端会用协商好的密码套件加密，然后将加密过的验证数据通过 Finish 报文传输给客户端。
+    1. TLS 会话复用：服务器将加密过的 SessionID 发给客户端，客户端发送的 SessionId 可以解密则可跳过协商阶段
+    2. 密码套件：
+        - 密钥交换协议：规定通信双方如何交换通信时使用的对称加密算法的密钥。影响 Server/Client Key Exchange
+        - 对称加密算法：规定双方通信时如何加密信息。影响通信测试和正常通信。
+        - 消息认证码算法：规定如何对内容进行哈希，生成 MAC。用于保证消息传输过程中不被篡改
+        - 伪随机算法：用于生成主密钥和相关密钥
 
-谁调用 this，this 就指向谁
+## 浏览器如何缓存
 
-- 全局
-    - 浏览器 window
-    - node {}
-- new
-    - 返回对象，指向该对象
-    - 返回其它，指向新对象
-- call，apply，bind
-    - 严格模式下，绑定传入的参数
-    - 非严格模式下
-        - 若为空，指向全局对象
-        - 若为值对象，返回对应的应用对象
-        - 其它，为传入的参数
-- 方法调用，调用位置上下文的对象
-- lambda，外层上下文绑定的 this 
+1. localStorage/sessionStorage/indexDB
+2. ServiceWorker/CacheAPI
+3. 设置 http 的头部 Cache-Control Expires
 
-## JS 基本对象
+## 详述http 1.0, 1.1, 2.0的区别
 
-- Boolean
-- String
-- Null
-- Undefined
-- Symbol
-- BigInt
-- Object
+1. HTTP/1.0 - 特性：
+    - 协议信息随着每个请求发送
+    - 状态码在响应开始时发送
+    - 引入 HTTP 头
+    - 可以使用 Content-Type 头来传输除 HTML 文件外其他类型文档的能力
+2. HTTP/1.1
+    - 特性：
+        - 连接可以复用
+        - 增加流水线
+        - 支持响应分块
+        - 引入缓存控制
+        - 引入内容协商
+        - 使用 Host 头，使得不同域名可以配置在同一个 IP 地址的服务上
+    - 拓展：
+        - 用于安全传输：SSL 和 TLS
+        - 用于复杂应用：
+            - REST
+            - Server-sent events
+            - WebSocket
+        - 放松 Web 的安全模型：CORS、DNT、CSP
+3. HTTP/2 - SDPY
+    - 特性：
+        - HTTP/2 是二进制协议。不可再读，也不可无障碍的手动创建
+        - 并行的请求能够在一个链接中处理，移除了 1.x 中的顺序和阻塞（但是仍然存在队首阻塞）
+        - 压缩了 headers，一系列的请求中部分 headers 可以压缩
+        - 允许服务器在客户端缓存中填充数据，通过有限的服务器推送机制来提前请求
+    - 拓展：
+        - 对 Alt-Src 的支持允许了给定资源的位置和资源鉴定，允许更加智能的 CDN 缓存机制
+        - Client-Hints 的引入允许客户端和服务器主动交流它的需求和硬件约束的信息
+        - 在 Cookie 头中引入安全相关的前缀，可以帮助一个安全的 Cookie 没有被修改过
 
-**typeof null==='object' JS 最初版本在 32 位环境中，性能考虑，低位存储类型，000 开头表示对象，null 全零，错误判断为 object**
+## 为什么禁止跨域
 
-## HTML5 语义化的理解
+- 使用 drawImage 等 canvas 绘制函数、以及 WebGL 贴图，可能存在攻击的风险：img、video 等方式访问第三方网页，会带上 cookie
+- 使用 XMLHttpRequest 和 Fetch 存在攻击的风险：XSS、CSRF
+- 使用 Web 字体，存在攻击的风险：二进制攻击和 CDN 滥用
+- 使用 iframe，存在攻击的风险：ClickJacking - 利用嵌入到你的文档或者将你的文档嵌入它的文档，以 iframe 的形式
+- 本地数据访问 - Cookie、Storage、indexDB
 
-优点：
+## OSI 七层
 
-- 代码结构清晰，易于理解、开发和维护
-- 利于屏幕阅读器和爬虫等其他类型客户代理阅读
-- 有益于 SEO
+1. 物理层：建立、维护和断开物理连接
+2. 数据链路层：建立逻辑连接、硬件寻址、差错检验
+3. 网络层：端到端逻辑地址寻址，实现不同网络之间的路径选择
+4. 传输层：端口到端口的数据传输，可能有流控、数据校验等其他功能
+5. 会话层：建立、管理和终止会话
+6. 表示层：数据的标识、安全和压缩
+7. 应用层：网络服务于用户的接口
 
-标签：
+## TCP 三次握手、四次挥手
 
-- title
-- header
-- nav
-- main
-- section
-- article
-- h1-h6
-- ul/ol/li
-- table/thead/tbody/tfoot/...
-- aside
-- figure
-- picture
-- details
-- mark
-- dialog
-- address
-- img/audio/video/canvas/picture/source
+### 三次握手
 
-## 让 (a==1 && a==2 && a==3) 为 true
+LISTEN -> SYSSENT -> ESTAB
+LISTEN -> SYN RCVD ->ESTAB
 
-### 利用隐式转换规则
+1. Client -> Server SYN, seq=x：客户端发送网络包，服务器收到；服务端确认客户端发送能力和服务端接收能力
+2. Server -> Client SYN + ACK, ack=x+1, seq=y：服务端发送网络报，客户端收到；客户端确认自己的发送能力、服务器接收能力、服务器发送能力、客户端接收能力
+3. Client -> Server ACK, ack=y+1, seq=x+n：客户端发送网络报，服务器收到；服务端确认服务端发送能力和客户端接收能力
 
-== 操作符在左右数据类型不一致的时候，会进行隐式转换，转换规则如下：
+服务端第一次收到 SYN 后，就会处于 SYN_RCVD 状态，称为半连接状态；若发送完 SYN-ACK 包，未收到回复，会指数重传，若超出最大重传次数，将会将半连接队列中删除。初始序号 ISN 会通过一定算法（计数器）随机选择，动态生成，避免攻击。第一次不发送数据，避免攻击。
 
-- 如果部署 `[Symbol.toPrimitive]` 接口，那么调用此接口
-- 如果非 Date 类型，调用 valueOf，如果返回非基本数据类型，返回调用 toString，如果 toString 返回非基本类型，那么抛出错误
-- 如果 hint 为 string，调用顺序为 toString >>> valueOf
-- 如果 hint 为 number，调用顺序为 valueOf >>> toString
+SYN 攻击是发送很多 SYN，使得正常的 SYN 的半连接队列因为已满而被丢弃，防御方法为：
 
-```js
-const obj = {
-    [Symbol.toPrimitive]: (function(hint) {
-        let i = 0;
-        return () => i++;
-    })()
-}
-```
+- 缩短 SYN Timeout 世间
+- 增大最大半连接数
+- 过滤网关防护
 
-```js
-const obj = {
-    reg: /\d/g,
-    valueOf: function(hint) {
-        return this.reg.exec('123')[0];
-    }
-}
-```
+### 四次挥手
 
-### 利用数据劫持
+客户端 ESTAB -> FIN_WAIT_1 -> FIN_WAIT_2 -> TIMED_WAIT -> CLOSED
+服务端 ESTAB -> CLOSE_WAIT -> LAST_ACK -> CLOSED
 
-```js
-let i = 1;
-Object.defineProperty(window, 'a', {
-    get: function() {
-        return i++;
-    }
-});
-```
+1. Client -> Server FIN, seq=x：客户端发送一个网络包，服务器收到，确认第 x 个包结束
+2. Server -> Client ACK, ACKnum = x+1：服务端发送一个网络包，客户端收到，确认第 x 个包已经被服务器收到
+3. Server -> Client FIN, seq=y：服务端发送一个网络包，客户端收到，确认第 y 个包收到
+4. Client -> Server ACK ACKnum = y+1: 客户端发送一个网络包，服务器收到，确认客户端第 y 个包收到，同意断开，此时客户端要等待计时器设置的 2MSL （报文段最大生存时间）后才进入 CLOSED 状态，等待服务器未收到确认的重传，同时防止下一个连接中不会出现这种就得请求报文段
 
-```js
-const a = new Proxy({}, {
-    i: 1,
-    get: function() {
-        return () => this.i++;
-    }
-})
-```
+两方都要通知对方自己已经结束需要断开，并等待对方同意
 
-### 利用数组的 join 方法
+## 详述TCP如何保证传输完整性
 
-```js
-const a = [1, 2, 3];
-a.join = a.shift;
-```
+- 定时器 + ACK + 重传
+- 首部校验和
+- 重排序
+- 流量控制
+- 序号丢弃重复
+- 有连接
 
-## 防抖函数作用、应用场景、实现
+## UDP和TCP有什么区别
 
-debounce 每当执行调用之后，更新计时，只有到计时结束时，才能触发动作
+- TCP：有连接，可靠，流控
+- UDP： 无连接，不可靠
 
-1. 调节窗口
-2. 字符输入
-3. 表单验证
+## 为什么使用 UDP
 
-```js
-function myDebounce(fn, wait, immediate = true) {
-    let timer;
-    const later = (context, args) => setTimeout(()=>{
-        timer = null;
-        if(!immediate) {
-            fn.apply(context, args);
-        }
-    }, wait);
-    const debounced = function (...params) {
-        const context = this;
-        const args = params;
-        if(!timer) {
-            timer = later(context, args);
-            if(immediate) {
-                fn.apply(context, args);
-            }
-        } else {
-            clearTimeout(timer);
-            timer = later(context, args);
-        }
-    }
-    debounced.cancel = function() {
-        clearTimeout(timer);
-        timer = null;
-    };
-    return debounced;
-}
-```
+- 可靠性排序靠后
+- 时效性较重要
+- 减少流控的影响
 
-## 节流的作用、应用场景、实现
+## WebSocket？
 
-throttle 规定一个时间，一段时间内只能执行一次：
+复用 http 1.1 的握手协议，完成后后续交换按照 WebSocket 协议。
 
-1. 按钮点击
-2. 拖拽事件
-3. 计算鼠标的距离
+首部：
 
-时间戳实现：
+- Connection: Upgrade 表示升级协议
+- Upgrade: websocket 表示升级到 Websocket
+- Sec-WebSocket-Version: 13 表示支持的版本号，如果服务器不支持，需要返回其 Sec-WebSocket-Version
+- Sec-WebSocket-Key 与响应的 Sec-WebSocket-Accept 配套
 
-```js
-function throttle (func, delay) {
-    let lastTime = 0;
-    const throttled = throttled(...args) {
-        const context = this;
-        const nowTime = Date.now();
-        if(nowTime > lastTime + delay) {
-            func.apply(context, args);
-            lastTime = nowTime;
-        }
-    }
-    throttled.cancel = function() {};
-    return throttled; 
-}
-```
+## RTT 问题？
 
-计时器实现：
+tcp 1.5 RTT
+tls 1.5 RTT/ tls1.3 1 RTT
+http 1 RTT
 
-```js
-function throttle(func, delay) {
-    let timeout = null;
-    const throttled = function(...args) {
-        const context = this;
-        if(!timeout) {
-            timeout = setTimeout(()=>{
-                func.apply(context, args);
-                clearTimeout(timeout);
-                timeout=null
-            }, delay);
-        }
-    }
-    throttled.cancel = function() {
-        clearTimeout(timeout);
-        timeout = null;
-    };
-    return throttled;
-}
-```
+http1.x = 2.5RTT
+https + http1.x  = 4RTT
+http2 = 队首 4RTT / 其它 1RTT（重用 TCP 连接，但有队首阻塞）
+http3/quic
+    - 页面整体加载时间 1RTT + 1RTT
+    - 重连时间 1RTT
 
-## 说一说对 JS 执行上下文栈和作用域链的理解
+    ## 浏览器 & HTTP 缓存策略
 
-JS 执行上下文就是 JavaScript 代码被解析和执行时所在环境的抽象概念，执行上下文分为：
+### 强缓存
 
-- 全局执行上下文
-- 函数执行上下文
-- eval 函数执行上下文
+指在缓存期间，请求不会发送到放服务器，浏览器直接返回缓存结果，需要设置 Header：
 
-创建过程：
+- Expires：是 HTTP/1.0 中用于控制网页缓存的字段，表示过期时间；此时使用的是客户端时间和缓存失效时间对比，当用户修改客户端时间时可能导致强缓存失效
+- Cache-Control：是 HTTP/1.1 中设置的。其常见值为：
+    - public 所有内容都被缓存（客户端和代理服务器）
+    - private 所有内容只有客户端可以缓存，默认为 private
+    - no-cache 客户端缓存内容，但是否使用缓存需要经过协商来决定
+    - no-store 所有内容都不会被缓存
+    - max-age=xxx 缓存内容将在 xxx 秒后失效
 
-1. 创建变量对象：初始化 arguments，提升函数声明和变量声明
-2. 创建作用域链：在执行上下文的创建阶段，作用域链在变量创建后创建
-3. 确定 this 的值
+上述两者同时存在，只有后者生效；其仅仅为兼容作用
 
-其栈即为函数调用栈。
+### 内存缓存和磁盘缓存
 
-作用域负责收集和维护所有声明的标识符（变量）组成的一系列查询，并实施一套严格的规则，确定当前执行的代码对这些标识符的访问权限，JS 使用词法作用域。其作用域链为逐层向外。
+1. 大文件，优先缓存到 disk，否则 mem
+2. 当内存占用率高时，优先缓存到 disk
 
-## 如何理解 BFC？BFC 的布局规则为？如何创建 BFC？
+### 协商缓存
 
-### 如何理解 BFC
+当请求没有命中缓存，或者强缓存失效后，需要向服务器发起请求，验证资源是否有更新。如果资源没有改变，返回 304，并更新浏览器缓存有效期；资源改变，返回 200 响应码，并返回响应资源，并更新浏览器缓存有效期。使用的 HTTP 头如下：
 
-盒子是 CSS 引擎根据文档中内容所创建的，不同类型的盒子在文档上占据不同类型的上下文。格式化上下文是页面的一块渲染区域及其渲染规则，包括它子元素的定位以及其自身与其它盒子的关系。一个块级盒子一定会参与格式化上下文的创建。
+1. Last-Modified & If-Modified-Since：前者表示文件最后的修改日期，由服务器添加到响应头中；后者由浏览器添加到请求头中，是上次该资源的 Last-Modified 值。浏览器收到请求后，会将后者和服务器上该文件修改时间戳对比，如果超过缓存时间，那么返回最新的资源，200 状态码；缺点如下：
+    - 如果文件打开过，修改时间会发生改变，导致该对失效
+    - 精确度只有一秒
+2. etag 和 If-None-Match：etag 类似文件指纹，由服务器添加到响应头中，浏览器会在请求头中添加 If-none-match 头，和 etag 比较；如果不一样，则返回 200 和资源；如果一样，返回 304。
 
-### BFC 的布局规则为
+当任意缓存策略都没有设置，浏览器会采取启发式策略，通常会读取 Response Header 中的 date 头，减去 Last-Modified 值的 10% 作为缓存时间。
 
-- 内部，盒子依次垂直排列
-- 两个盒子的距离由 margin 决定，上下相邻的 margin 会发生重叠（其实内部接触也会重叠）
-- BFC 内每个盒子的左 margin-left-edge 接触外部盒子的 content-left-edge，即使在左浮动情况下也是如此
-- BFC 内的行上下文会自动伸缩以适应两侧浮动
-- BFC 内计算好后，不会影响外部元素
-- 计算 BFC 高度时，浮动元素也会计算
+### 实际场景
 
-### BFC
+对于频繁变动的资源：
 
-- 根元素
-- 浮动元素
-- position: absolute 或者 fixed
-- display: block, inline block, table-cell, table-caption, inline table, display: flow-root, contain: layout/content/paint 的元素，弹性元素、网格元素、多列元素, overflow: visible
-- 匿名块盒子
+1. 完全不缓存: no-store
+2. 协商缓存：cache-control：no-cache，是浏览器每次都会走服务器，然后配合 etag 或者 last-modified 来验证资源是否有效，这样对于完全不缓存来说，虽然无法减少 HTTP 请求次数，可以显著减少响应数据大小。
+
+文件：
+
+1. HTML 文件不设缓存；
+2. CSS、JS 等文件可以设置一个较长的缓存期，比如一年，使用文件名_hash 的方法来更新文件；
+
+## 跨域访问
+
+当一个资源从与该资源本身所在不同的域、协议或者端口请求一个资源时，称为跨域访问。
+
+## OAUTH、JWT、Open?
+
+见认证、授权和凭证
+
+## XSS，CSRF，数据库注入怎么防范？
+
+XSS：控制前端渲染
+CSRF：控制后端处理
+数据库注入：预编译
+
+## CSRF 防御
+
+1. 判断请求头中的 Referer，但是 Referer 可以设置，在较老的浏览器中该漏洞依然存在
+2. 新增 CSRF Token
+3. 使用 JWT
 
 ## 什么是 XSS 攻击？分为哪几类？怎么防范？
 
@@ -843,514 +851,316 @@ Content-Security-Policy: default-src 'self'
 - HTTPonly 和 Secure
 - 验证码
 
-## 如何隐藏页面中元素
-
-- display: none 不占据空间的完全隐藏
-- hidden 属性，CSS3 新增，不占据空间，完全隐藏
-- position：absolute/fixed + left/top: -9999999px，向左、上移动，不占空间
-- position: relative + left/top: -9999999px，占据空间，若要不占空间，可以设置 height: 0
-- margin-left: -999999px; 占据空间
-- transform 
-    - scale(0) 不占空间
-    - translateX/Y(-9999999px) 占据空间，可设置 height
-    - rotateX/Y(90deg) 占据空间
-- height: 0, width: 0, line-height: 0, font-size: 0, overflow: hidden 不占空间
-- opacity: 0 占据空间
-- visibility: hidden 占据空间
-- z-index: -999 + position: relative 占据空间
-- clip-path: polygon(0 0, 0 0, 0 0, 0 0); 占据空间
-- aria-hidden 属性，语义上隐藏，占空间可见
-
-## 浏览器的事件代理机制的原因是？
-
-事件流：DOM2 级事件将事件流分为是三个阶段，捕获阶段、目标阶段、冒泡阶段
-
-事件代理机制的原理：在祖先 DOM 绑定一个元素，当触发子孙级 DOM 元素的事件时，利用事件冒泡的原理来触发绑定在祖先级 DOM 的事件，一层层冒泡到 document 对象
-
-事件代理的原因：
-
-1. 减少实际添加到网页上的事件，维护性能
-2. 事件代理时，子孙动态，不需要为新添加的子孙绑定事件
-3. 子孙移除后，不需要手动清理事件
-4. 允许一个事件注册多个监听
-5. 提供更精细的手段控制 listener 的触发阶段
-6. 对任何 DOM 有效，而不仅仅是 HTML
-
-addEventListener:
-
-```js
-target.addEventListener(type, listener[, options]);
-target.addEventListener(type, listener[, useCapture]);
-```
-
-options 对象
-
-- capture：true 表示在捕获阶段触发，否则在冒泡阶段触发
-- once: 在添加后调用一次，后自动移除
-- passive: 永远不应该调用 preventDefault() 如果调用，则会忽略并得到控制台警告
-
-## setTimeout 倒计时误差
-
-加入宏队列需要时间，计时到达后等待主线程任务完成需要时间
-方法：从服务器或者 ntp 获取时间，修正计时器
-
-## 异步加载 JS 脚本的方法有
-
-### defer/async 属性
-
-```html
-<script src="../xxx.js" defer/async></script>
-```
-
-- defer: 等到页面在内存中正常渲染结束，其它脚本完成执行，window.onload 之前执行，如果多个 defer，会按照顺序加载
-- async：下载完，渲染引擎中断渲染，执行该脚本后渲染，多个 async 不能保证顺序
-
-### preload/prefetch 预加载
-
-```html
-<link rel=preload/prefetch href="../xxx" as=media-type type=mime-type>
-```
-
-preload 提前获取之后该页面要使用的资源，prefetch 提前获取之后其它页面要使用的资源
-
-### 动态创建 script 标签
-
-```js
-let script = document.createElement('script');
-script.src = 'XXX.js';
-document.body.append(script);
-```
-
-### XHR 或者 fetch 异步加载 JS 并使用 eval 执行
-
-```js
-let xhr = new XMLHttpRequest();
-xhr.open("get", "js/xxx.js",true);
-xhr.send();
-xhr.onreadystatechange = function() {
-    if (xhr.readyState == 4 && xhr.status == 200) {
-        eval(xhr.responseText);
-    }
-}
-```
-
-### import() 结合 fetch
-
-## 实现 flattenDeep 函数，将嵌套数组扁平化
-
-### arr.flat
-
-```js
-function flattenDeep(arr, deepLength) {
-    if(deepLength>Number.MAX_SAFE_INTEGER) {
-        deepLength = Number.MAX_SAFE_INTEGER;
-    }
-    return arr.flat(deepLength);
-}
-```
-
-### reduce 和 concat
-
-```js
-function flattenDeep(arr) {
-    return arr.reduce((acc, val)=> Array.isArray(val) ? arr.concat(flattenDeep(val)): acc.concat(val), []);
-}
-```
-
-### 利用 stack 实现
-
-## 可迭代对象的特点
-
-有 `[Symbol.iterator]` 接口返回一个遍历器对象，可以使用 next() 函数获取 value 和 done，可以使用 for ... of 进行循环
-
-### 自定义迭代器对象
-
-```js
-*fn() {
-    yield xxx
-}
-```
-
-使用生成器可以自定义迭代器对象
-
-### 异步迭代器
-
-有 `[Symbol.asyncIterator]` 接口返回一个遍历器对象，可以使用 next() 获取 value 和 done 的 promise，可以使用 for await ... of 循环
-
-异步生成器
-
-```js
-async function* fn() {
-    yield await xxx;
-}
-```
-
-## Promise.race 及其实现
-
-只要有一个参数 fullfilled 或者 reject，则 fullfilled 或者 rejected
-
-实现：
-
-```js
-function myRace(iterable) {
-    const arr = Array.from(iterable);
-    return new Promise((resolve, reject)=> {
-        if(arr.length===0) {
-            return resolve();
-        }
-        arr.forEach(p=> Promise.resolve(p).then((d)=>resolve(d), err=>reject(err)));
-    });
-}
-```
-
-## 数组去重
-
-```js
-function unique(array) {
-    return [...new Set(array)];
-}
-```
-
-其它方法时间复杂度较高
-
-## 编写通用 currying
-
-```js
-function currying(fn, ...args) {
-    return (...others) => fn(...args, ...others);
-}
-```
-
-## 原型链继承的思路和优缺点
-
-调用方法和属性时，如果没找到会顺着原型链向上查找，实现某种程度的继承
-
-优点：
-
-1. 单继承
-2. 可以像超类传递参数
-3. 解决引用值共享问题
-4. 可以动态修改原型链
-
-缺点：
-
-1. 单继承
-2. 查找耗时
-
-## 组合继承的思路和优缺点
-
-将原型链和借用构造函数结合到一起，通过原型链实现对原型属性和方法的继承，通过借用构造函数实现对实例属性的继承
-
-优点：
-
-1. 每个子类可有自己的属性
-2. 可向超类传递参数
-3. 可函数复用
-
-缺点：
-
-1. 调用两次构造函数
-
-## 原型式继承
-
-通过已有对象创建新对象，不必创建自定义类型，ES6 中可以使用 Object.create(proto) 来创建
-
-优点：
-
-1. 借助已有对象创建新对象，不必创建自定义类型
-
-缺点：
-
-1. 包含引用类型的属性会被所有实例共享
-
-## 寄生式继承
-
-类似工厂模式
-
-优点：
-
-1. 考虑对象而不是自定义类型和构造函数，很有用
-
-缺点：
-
-1. 不能函数复用
-2. 包含引用类型只的属性会被所有实例共享
-
-## 寄生组合式继承
-
-原型链继承方法，借用构造函数继承属性
-
-优点：
-
-只调用一次超类构造函数
-原型链不变
-
-## ES6 继承
-
-通过 extends 关键字实现：
-
-```js
-console.log(typeof SuperType);//function
-console.log(SuperType === SuperType.prototype.constructor); //true
-```
-
-类内方法默认不可枚举，而 ES5 可枚举；class 不能不加 new 直接调用；子类继承必须使用 super 方法，否则报错；使用 super 后才能使用 this 关键字
-
-## 实现 `JSON.stringify`
-
-```js
-function jsonStringify(data, set) {
-    const dataType = typeof data;
-    if (dataType!=='object') {
-        if(Number.isNaN(data) || data===Infinity || data===-Infinity) {
-            return "null";
-        } else if(dataType==="function" || dataType==="symbol" || dataType==="undefined") {
-            return "undefined";
-        } else if(dataType==="string") {
-            return `"${data}"`;
-        } else if(data.toString && typeof data.toString === "function") {
-            // such as bigint
-            return data.toString();
-        } else {
-            // unreachable in es10
-            return "undefined";
-        }
-    } else {
-        if(data===null) {
-            return "null";
-        } else if(data.toJson && typeof data.toJson === "function") {
-            return jsonStringify(data.toJSON());
-        } else if(data instanceof Array) {
-            const result = [];
-            data.forEach((item)=>{
-                const itemType = typeof item;
-                if(itemType === "undefined" || itemType==="function" || itemType === "symbol") {
-                    result.push("null");
-                } else {
-                    result.push(jsonStringify(item));
-                }
-            });            
-            result = `[${result}]`;
-            return result.replace(/'/g, '"');
-        } else {
-            if(set) {
-                set = new Set();
-            }
-            if(set.get(data)!==null) {
-                return "undefined";
-            }
-            set.add(data);
-            const result = [];
-            Object.keys(data).forEach((item)=>{
-                if(typeof item!=='symbol') {
-                    if (data[item] !== undefined && typeof data[item] !== 'function'
-                        && typeof data[item] !== 'symbol') {
-                        result.push('"' + item + '"' + ":" + jsonStringify(data[item], new Set(set)));
-                    }
-                }
-            });
-            return ("{" + result + "}").replace(/'/g, '"');
-        }
-    }
-}
-```
-
-## 实现 JSON.parse
-
-```js
-(new Function('return'+json))();
-```
-
-基于 eval，必要时需要做过滤，避免 XSS
-
-## 实现 Observable 和 Subject
-
-### Observable:
-
-```js
-function myObservable(observer) {
-    const datasource = new DataSource();
-    datasource.ondata(e) => observer.next(e);
-    datasource.onerror(err) => observer.error(err);
-    datasource.oncomplete() => observer.complete();
-    return () => {
-        datasource.destroy();
-    };
-}
-```
-
-观察者约定：
-
-1. 不在 complete 或者 error 后调用 next
-2. 取消订阅后，不能使用任何方法
-3. 调用 complete 和 error 需要取消订阅逻辑
-4. 如果 next、complete 或者 error 处理方法抛出异常，要调用取消订阅逻辑，以确保不会泄露资源
-5. next、error 和 complete 实际上都是可选的。你无需处理每个值、错误或完成。你可能只是想要处理其中一二
-
-### Subjects 实现
-
-```js
-class MySubject extends Rx.Observable {
- 
- constructor() {
-   super();
-   this.observers = [];
- }
- 
- subscribe(observer) {
-   this.observers.push(observer);
- }
- 
- next(value) {
-   this.observers.forEach(observer => observer.next(value));
- }
- 
- error(error) {
-   this.observers.forEach(observer => observer.error(error));
- }
- 
- complete() {
-   this.observers.forEach(observer => observer.complete());
- }
- 
-}
-```
-
-## 使用 CSS 让一个元素水平垂直居中
-
-### 利用 flex 布局
-
-```css
-.container {
-    display: flex;
-    aligh-items: center;
-    justify-content: center;
-}
-```
-
-### 子元素是单行文本
-
-```css
-.container {
-    height: 100px;
-    line-height: 100px;
-    text-align: center;
-}
-```
-
-### 利用 absolute + transform
-
-```css
-.container {
-    position: relative;
-}
-
-.box {
-    top: 50%;
-    left: 50%;
-    transform: translate(50%, 50%);
-}
-```
-
-### 利用 grid 布局
-
-```css
-.container {
-    display: grid;
-}
-
-.box {
-    justify-self: center;
-    align-self: center;
-}
-```
-
-### 利用绝对定位和 margin: auto
-
-```css
-.container {
-    position: relative;
-}
-.box {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    margin: auto;
-}
-```
-
-## ES6 模块和 CommonJS 模块的差异
-
-1. 运行时和编译时
-    - CommonJS 模块运行时加载，import 是静态加载，编译时确定模块依赖关系；注意有 import() 是动态的
-    - CommonJS 加载的是对象，该对象在脚本运行完成才会生成
-2. CommonJS 输出的是值的拷贝，ES6 输出的是值的只读引用
-3. ES6 模块自动使用严格模式
-4. require 可以做动态加载，import 语句（非import函数）做不到
-6. 使用 require 加载某个模块时，就会运行整个模块的代码
-7. 当使用 require 命令加载同一个模块时，会使用缓存，除非删除缓存，否则不会得到新值
-
-ps: export default 可以理解为将变量赋值给 default，最后导出 default
-
-## 重绘和重排
-
-### 渲染过程
-
-1. DOM Tree -> Render Tree
-2. Style struct -> Render Tree
-3. Render Tree -> Paint
-
-浏览器解析 HTML 源码，创建 DOM 树，每个 HTML 标签在树上都有一个对应的节点；标签中的文本也有对应的文本节点；DOM 树上根节点式 documentElement；浏览器解析 CSS；合并创建渲染树，类似 DOM 树，但并不一一对应；渲染树上的节点使用对应的格式化上下文进行渲染。一旦渲染树被创建成功，浏览器就可以在屏幕上绘制渲染树节点。
-
-### 重绘和重排
-
-在第一次排列和绘制之后，每次改变用于构建渲染树的信息都会导致至少：
-
-- 部分渲染树的节点尺寸需要重新计算 —— 重排
-- 由于节点几何属性或者样式发生改变，更新屏幕内容 —— 重绘
-
-这些操作代价高昂
-
-### 触发的场景
-
-1. 无格式化上下文几何变化的变化 -> 重排和重绘
-2. 单纯样式变化 -> 重绘
-
-### 浏览器的优化
-
-创造变化队列，在一定时间内同种可覆盖变化会发生覆盖；但在可能需要几何信息的情况下会立即触发变化，可以先缓存值
-
-### 最小化重排和重绘
-
-- 不要逐个改变样式
-- 离线的批量改变和表现 DOM
-- 通过 documentFragment 来保留临时改动
-- 通过复制改变替换的方式
-- 通过 display: none 属性隐藏元素，添加足够多的变化后，再显示
-- 不频繁计算样式，如果有需要，可以缓存
-
-## 如何让 Promise.all 在抛出异常后仍然有效
-
-给每个作为参数的 promise 实例添加 catch 方法，则其在抛出异常并经过 catch 处理后会转换为 fullfilled 状态
-
-```js
-const tasks = promises.map(p=>Promise.resolve(p).catch(e=>e));
-Promise.all(tasks) //...
-```
-
-## Promise如何满足多个异步进程的同步顺序
-
-1. then 链式调用，若前一个回调函数返回的是 promise 对象，则后一个回调会等待该 promise 对象的状态发生变化，后者才会被调用
-2. async await 语法糖
-
-## Promise 的状态
-
-pending、fullfilled、rejected
+# 算法 & 系统
+
+## 分布式系统用什么算法排序？
+
+map-reduce、归并
+
+## 进程和线程的区别
+
+进程是包含独立资源上下文的 CPU 工作时间单位，线程是共享进程资源上下文的 CPU 工作时间单位。
+
+## 稳定排序
+
+- 冒泡：稳定
+- 选择：不稳定
+- 插入：稳定
+- 快速：不稳定
+- 归并：稳定
+- 基数：稳定
+- 希尔：不稳定
+- 堆：不稳定
+
+## 死锁的四要素和定义
+
+死锁定义：两个或者以上的进程在执行过程中，因资源争夺而造成的互相等待的现象，若无外力作用，无法继续推进。
+
+死锁原因：
+
+1. 系统资源不足
+2. 请求顺序不适当
+3. 资源分配不当
+
+四要素：
+
+1. 循环等待
+2. 请求并保持
+3. 互斥资源
+4. 不可剥夺
+
+死锁的解除和预防：
+
+1. 预防
+    - 优先级
+    - 尝试获取的超时
+    - 可抢占
+    - 可共享资源不要设置为互斥
+2. 避免
+    - 进程启动拒绝
+    - 资源分配拒绝
+3. 解除
+    - 剥夺资源
+    - 撤销进程
+
+# 框架 & 库 & 优化
+
+## React 面试题
+
+1. 类组件和函数组件之间的区别
+    - 类组件可以使用 state 和钩子等特性
+    - 函数式组件是建立 props 和页面渲染之间的映射的函数，也可以使用 hooks 接口实现部分上述功能
+2. React 中的 refs？
+    - 提供一种访问在 render 方法中创建的 DOM 节点或者其他 React 函数的方法。即这些元素的引用。
+3. React 中如何处理事件？
+    - 为了解决跨浏览器的兼容性问题，SyntheticEvent 实例被传递给事件处理函数，它是跨浏览器的事件包装器，拥有和浏览器原生事件相同的接口
+4. state 和 props 的区别？
+    - state 是组件自己管理的数据，控制自己的状态，可变
+    - props 是外部传入的数据参数，不可变
+5. 如何创建 refs？
+    - 类组件：
+        - 声明及初始化：`this.myRef = React.createRef();`
+        - 绑定： `<div ref={this.myRef}></div>`
+        - 函数绑定：`<div ref={this.input = input}></div>`
+    - 函数式组件及 hooks：
+        - 声明和初始化 `const ref = useRef(null);` 
+        - 函数绑定 `<div ref={(divRef)=>ref.current = divRef}></div>`
+        - 绑定 `<div ref={ref}></div>`
+6. 什么是高阶组件？
+    - 是接受并返回一个新组件的函数
+    - 可以动态接受任何提供的子组件，但不会修改或者复制输入组件中的任何行为
+7. 在构造函数调用 super 并将 props 作为参数传入的作用是？
+    - 在调用 super() 之前，子类构造函数无法使用 this 引用（ES6 知识）
+8. 什么是控制组件？
+    - React 在诸如表单元素等元素时，包含表单的组件将跟踪其状态的输入值，并在每次回调函数触发时重新渲染组件。以这种方式由 React 控制其值的输入表单元素称为控制组件
+9. React.createElement？
+    - 参数：
+        tag 或者组件名
+        选项
+        子节点
+10. 什么是 JSX？
+    - 新的语法糖，主要用于在 JavaScript 中直接加入 XML 内容，主要被 React 使用
+    - 新的语法糖，主要用于在 JavaScript 中直接加入 XML 内容，主要被 React 使用
+11. React 的生命周期？组件函数
+    - 挂载：
+        - constructor(props)：
+            - 如果不初始化 state，或者不进行方法绑定，则不需要为 React 组件实现构造函数
+            - 只能在构造函数中给 this.state 赋值；其它方法中赋值，应当使用 this.setState() 代替
+        - getDerivedStateFromProps：
+            - 在调用 render 之前调用，返回一个对象来更新 state, 如果返回 null 则不更新任何内容
+            - 用于实现 state 的值任何时候都取决于 props 的情况，例如实现 `<transition></transition>`
+            - 派生状态会产生冗余：
+                - 执行副作用响应 props 的更改，使用 componentDidUpdate
+                - prop 更改时，重新计算某些数据，使用 memoization helper
+                - props 更改时重置某些 state，使用受控组件或者使用 key 使组件完全不受控
+        - render：见下文
+        - componentDidMount：
+            - 依赖 DOM 节点的初始化
+            - 挂载完成后，进行的副作用和订阅；记得在 componentWillUnmount 中移除
+            - 在此处调用 setState 将触发额外渲染，但此渲染会发生在浏览器更新屏幕之间，避免闪烁；会造成性能问题；当渲染依赖于 DOM 节点的大小和位置时可以使用该模式
+    - 更新：
+        - getDerivedStateFromProps
+        - shouldComponentUpdate(nextProps, nextState)：
+            - 是否应该进行这次更新
+            - 首次渲染和使用 forceUpdate 的时候不会调用此方法
+            - 仅仅用于性能优化
+        - render：
+            - 该函数是 class 组件中唯一必须实现的方法
+            - 检查 this.props 和 this.state 的变化
+            - 返回以下类型之一
+                - React 元素
+                - 数组或者 fragments
+                - Porals
+                - 字符串或者数值类型
+                - 布尔类型或者 null（什么都不渲染，为了支持返回 `test && <Child/>` 的模式）
+            - 该函数是纯函数，在不修改组件 state 的情况下，每次调用时都会返回相同的结果，且不与浏览器直接交互
+        - getSnapshotBeforeUpdate：
+            - 用于在 DOM 更新前获取一些之前的 DOM 状态，应该返回 snapshot 的值和 null
+        - compoentDidUpdate(prevProps, preState, snapshot)：
+            - 更新后立即调用，首次渲染不会执行此方法
+            - 对于 prop 、state 变化引发的变更，需要包裹在条件语句中，否则会触发死循环
+            - 如果实现了 getSnapshotBeforeUpdate 则其返回值将作为第三个参数，否则为 undefined
+    - 卸载：
+        - componentWillUnmount：
+            - 在组件卸载和销毁之前调用，在此函数中执行销毁操作
+            - 不应该调用 setState，因为该组件永远不会重新渲染
+    - 错误处理：如果组件定义了错误处理生命周期方法，则其为 Error boundaries，其会在子组件树中的任何位置捕获 JS 错误，记录错误并展示降级 UI（无法捕获本身的错误）
+        - getDerivedStateFromError(error)
+            - 在后代组件抛出错误后被调用。将抛出的错误作为参数，返回一个值以更新 state
+            - 在渲染阶段出现，不允许出现副作用
+        - componentDidCatch(error, info)
+            - 在后代组件抛出错误后被调用，接收两个参数：
+                - error —— 抛出的错误
+                - info —— 带有 componentStack Key 的对象，包含有关组件引发错误的栈信息
+            - 在提交阶段被调用，允许执行副作用，用于记录错误等
+    - 其它 API
+        - setState(updater, [callback])
+            - 将对组件 state 的更改排入队列，并通知 React 需要使用更新后的 state 重新渲染此组件及其子组件。它是用于更新用户界面以及相应事件处理器和处理服务器数据的主要方式
+            - setState 不会保证立即生效，会合并变更，延迟生效；
+            - 不要建立多个 state 之间的值依赖，可能导致更新问题;可以使用 componentDidUpdate 或者 setState 回调函数；如果使用想要避免更新的性能损失，则可以使用 componentShouldUpdate
+            - updater 为 (state, props) => stateChange 形式的函数；如果为对象类型，则使用此对象类型浅拷贝更新；可以使用 Object.assign 的形式合并多次变更
+        - forceUpdate(callback)
+            - 默认情况下，当组件 state 和 props 发生变化时才会更新组件；当依赖外部某个状态才会更新时，可以使用 forceUpdate 强制组件重新渲染
+            - 会跳过 componentShouldUpdate
+    - 类属性
+        - defaultProps
+            - 可以为类组件添加默认 props，用来设置 props 未赋值时的默认状态
+        - displayName
+            - 用于显示更多调试信息
+    - 实例属性
+        - props 义的 props
+            - this.props.children 是特殊的 prop，通常由 JSX 表达式中子组件组成，而非组件本身定义
+        - state
+            - 包含了随时可能变化的数据，由用户定义，是普通 JS 对象
+            - 不用于渲染和数据流的对象，直接设置在组件实例上
+12. React portal?
+    - ReactDOM.creatPortal(child, container)
+    - 概述：Portal 可以将子节点渲染到存在于父节点以外的 DOM 节点
+    - 参数：
+        - 第一个参数是任何可渲染的 React 子对象；
+        - 第二个参数是一个 DOM 元素
+    - 用途：
+        - 将子元素插入到 DOM 节点中不同位置，而不是最近的父节点；方便在父组件拥有 overflow: hidden 和 z-index 样式时能够在视觉上跳出容器
+        - 无论子节点是否是 portal，内部触发的事件将沿着 React 组件树进行冒泡，而非 DOM 树；context 等功能特性不变
+13. componentWillReceiveProps？
+    - 反面模式：
+        - 直接复制 prop 到 state：
+            - 只要父组件重新渲染，getDerivedStateFromProps 和 componentWillReceiveProps 就会重新调用，而无论 props 是否变化；一个 prop 改变，会造成整体的 props 刷新，最终造成丢失 state
+        - 在 props 变化后修改 state
+            - 可能导致拥有同样账户的两个用户切换时，输入框不会重置
+    - 建议的模式：
+        - 完全受控的组件：从组件中完全删除 state，组件只响应 props
+        - 有 key 的非可控组件：使用 userId 或者 hash 或者随机值作为 key 重新创建一个用户框（当有重逻辑时，该种方法避免 diff 反而加快）
+        - 在 key 受限的情况下，使用 getDerviedStateFromProps 观察键的变化
+        - 内部方法强制更新组件，使用 ref 进行调用
+        - 仅在输入变化时，重新计算 render 需要的值，可以使用 memorization 
+14. PureComponents？
+    - 只有在 props 和 state 变化才会修改
+15. Memorization？
+    - 当参数改变时才会改变，否则返回旧值
+    - 每个组件内部都要引入 memorized 方法，避免实例之间相互影响
+    - memoization 帮助函数的缓存空间会有限制
+16. Fragments？
+    - 返回多个元素的通用模式
+    - 写法 `<Fragments>` 或者 `<>`，不生成实际组件
+    - key 是唯一可以给予 Fragments 的属性
+17. 代码风格？
+    - import("./xxx").then() 模式
+    - const OtherComponent = React.lazy(() => import('./OtherComponent')) 
+        - 可以像常规渲染组件一样异步返回组件
+        - 等待时可以使用 Suspense 组件中渲染进行优雅降级，fallback 设置失败后的表现
+        - 模块加载失败触发的错误，可以使用异常捕获边界来处理
+    - 基于路由的代码分割
+    - React.lazy 目前只支持默认导出，命名导出需要经过中间组件包装，tree-shaking 才不会出错
+19. Context？
+    - 提供了一种无须为每层组件手动添加 props，就能在组件树之间进行数据传递的方法
+    - 何时使用 context
+        - 对于组件树是全局的数据的共享
+        - 只是想避免层层传递一些属性，可以使用组件组合；将组件自身传递下去可以减少需要传递的 props 的数量
+        - 需要更高阶的使用，可以使用 render props
+    - API
+        - const XxxContext = React.createContext(defaultValue)
+            - 创建一个 Context 对象，当 React 渲染了一个订阅了该 Context 对象的组件，这个组件会自动从组件树离自身最近的 Provider 中读取当前值；
+            - 只有组件树中无匹配 Provider 时，defaultValue 才会生效；undefined 传递给它时，默认值不生效
+        - Context.Provider `<MyContext.Provider value={}>`
+            - 接收一个 value 属性，传递给消费组件。
+            - 当值发生变化时，内部的所有消费组件都会重新渲染，不受制于 shouldComponent
+            - 使用 Object.is 来检测变更
+        - Class.contextType
+            - 挂载在 class 上的 contextType 属性会被重新赋值为一个由 React.createContext() 创建的对象。使得自身可以在 this.context 上消费最近 Context 上的值，可以在任何生命周期中访问到，包括 render
+        - Context.Consumer
+            - `<MyContext.Consumer> {value => /* 基于 context 值进行渲染*/} </MyContext.Consumer>`
+            - 需要函数作为子元素的做法
+        - Context.displayName 可以在调试时提供更好的名字
+    - 使用案例：
+        - 动态 Context
+        - 在嵌套组件中更新 Context：创建 context 时传递函数，来进行修改（依赖注入？）
+        - 消费多个 Context：为了确保 context 快速进行重渲染，需要使得每一个消费者组件在组件树中称为一个单独的节点
+20. Refs 转发？
+    - 该技术可以自动地通过组件传递到子组件
+    - 使用：
+        - 通过 React.createRef 创建 React.ref
+        - 将组件的 ref 绑定到该变量
+        - 使用 React.forwardRef 创建绑定转发的组件
+        - 绑定到内部节点
+    - 在高阶组件中转发 refs：
+        - refs 不会投传，因为其类似 key ，并不是 prop 属性，该方法可以转发
+21. 高阶组件？
+    - 组件是将 prop 转换为 UI，高阶组件是将组件转换为另一个组件
+    - 不要试图在高阶组件中修改组件原型，而是使用组合方式修改
+    - 约定：
+        - 将不相关的 props 传递给被包裹的组件
+        - 最大化可组合性
+        - 包装显示名称便于调试
+    - 问题：
+        - 在 render 中使用高阶函数会导致无法 diff 而直接替换
+        - HOC 后，无静态方法，需要手动复制
+22. Profiler？
+    - 可以以组件的形式使用测量性能
+    - `<Profiler id="Navigation" onRender={callback}> <Navigation {...props} /></Profiler>`
+    - onrender 回调
+23. Render Props？
+    - 在 React 组件之间使用一个为函数 prop 共享代码
+    - 仅仅是将一个函数传递作为 props
+    - 注意：
+        - 可能抵消 PureComponent 的优势
+        - 该模式可能需要设置 `Mouse.propTypes = {children: PropTypes.func.isRequired};`
+24. 使用 PropTypes 可以帮助检查类型
+25. Hooks 规则？
+    - 本质就是 JS 函数
+    - 只在最顶层使用 Hook，不在函数、条件和嵌套函数中使用 hooks，否则不能保证 Hook 在每一次渲染中按照相同顺序调用
+    - 只在 React 函数中调用 Hook，不在普通的 JS 函数中调用 Hook
+    - React 是通过 Hook 调用的顺序得知哪个 state 对应哪个 useState
+    - 想要有条件的执行 effect，可以将判断放到 Hook 内部
+26. 常用 Hooks？
+    - useState
+        - 函数式更新, setXxx(oldvalue=>newvalue)
+        - 惰性初始化，传递一个函数
+        - 使用 State Hook 的更新函数传入当前 state 时，React 将跳过子组件的渲染
+    - useEffect
+        - 执行副作用
+        - 返回函数会被执行，可以帮助清除副作用
+        - 浏览器完成布局绘制之后，传给 useEffect 的函数延迟执行
+        - 传递第二个参数，是依赖的函数，若未改变，则不会执行
+    - useContext
+        - 接收的参数必须是 Context 本身
+    - useReducer
+        - 接收 reducer 为 (state, action) => newState，返回当前 state 和 dispatch 方法
+        - 使用 useReducer 给触发深度更新的组件做性能优化
+        - 将初始化函数作为第三个参数传入，可以惰性初始化
+        - 如果返回值和当前 state 相同，跳过子组件渲染和副作用执行
+    - useCallback
+        - 返回 memoized 回调函数
+    - useMemo
+        - 返回 memoized 值，在渲染期间执行，不要执行无关操作
+    - useRef
+        - 返回可变 ref 对象
+    - useImperativeHandle
+        - 在使用 ref 时自定义暴露给父组件的实例值，应当与 forwardRef 一起使用
+    - useLayoutEffect
+        - dom 更新后同步触发重渲染
+    - useDebugValue
+        - 在 React 开发工具中显示自定义 hook 标签
+27. 自定义 Hook？
+    - 定义一个 use 开头的函数，内部可以定义其它 hooks
+28. redux 架构？dispatch？
+    - action => 描述如何改变 store，一般同步，可以借助中间件实现异步
+    - reducer => 纯函数，根据旧 store 计算新 store
+    - dispatch => 发起 action
+    - store => 仓储，唯一，存储一颗状态数
+    - state => 状态，只读
+    - subscribe => 订阅更新，其它组件可以通过此刷新自己的视图
+    - connect 将 store 的 getState 和 dispatch 包装成组件 props
+
+## Angular 脏数据检测的原理
+
+早期 angular 使用从树顶到底下进行脏检查，每个组件拥有自己的检查函数
+
+zone.js 对异步事件做代理包裹。ApplicationRef 类，监听 ngZone 中的 onTurnDone 事件，只要触发事件，执行 tick 方法对变更做检测
 
 ## VueX 相关问题汇总
 
-1. **VueX 是什么？**vuex 是 vue 的插件，目的是实现跨组件的状态量管理；唯一改变状态的方法是提交 mutation
+1. **VueX 是什么？** vuex 是 vue 的插件，目的是实现跨组件的状态量管理；唯一改变状态的方法是提交 mutation
 2. **VueX 解决了什么问题？**
     - 多个组件依赖同一状态时，对于多层嵌套的组件的传参非常繁琐，并且兄弟组件之间传递状态无能为力
     - 通过引用方式维护则非常脆弱
@@ -1815,6 +1625,43 @@ pending、fullfilled、rejected
     - 原生 typescript
     - API 变得太快 = class component -> functional API -> composition API
 
+## Vue 的父子组件之间的通信方式
+
+1. 父组件向子组件 props，单向数据流
+2. 子组件向父组件 emit event, 事件
+
+children:
+
+```vue
+props: {
+    msg: {
+        type: String,
+        default: () => {
+            return ' ';
+        }
+    }
+},
+methods: {
+    say() {
+        this.$emit('say', this.data1);
+    }
+}
+```
+
+parent:
+
+```vue
+<children :msg=msg @say=parentSay>
+```
+
+
+此外父组件可以通过子组件的 refs 触发子组件的事件，还可以使用 VueX 和自己写总线的方式进行沟通。
+
+```vue
+<children ref="childrenRef"></children>
+//...
+this.$refs.childrenRef.func()
+```
 
 ## SPA 的理解，优缺点？
 
@@ -1824,7 +1671,7 @@ SPA 是一种将单个页面加载到服务器中的 WEB 应用，当浏览器�
 
 1. 交互体验良好，不需要重新刷新页面、获取资源，数据通过 ajax 异步获取，比较流畅
 2. 前后端分离
-3. 减小服务端动态渲染的成本
+3. 减小服务端动态渲染的成本192
 
 ### 缺点
 
@@ -1844,65 +1691,33 @@ SPA 是一种将单个页面加载到服务器中的 WEB 应用，当浏览器�
 - MVP P 代表 Presenter，Presenter 将数据发送给 View，要求 View 把数据展示；Presenter 和 View 相互依赖；使得 View 和 Model 不再相互耦合 —— Presenter 和 View 仍然相互依赖，无法做单元测试
 - MVVM，VM 代表 ViewModel，于是只要建立 ViewModel 和 View 的映射，ViewModel 和 Model 的映射即可，相互之间的耦合，相对解除
 
-## 对 Object.defineProperty 的理解
+## hybrid是什么？
 
-Object.defineProperty(obj, prop, descriptor) 会在对象上定义新属性，或者修改一个对象的现有属性，返回该对象
+抽象上说是混合模式移动应用，常见的有 原生 + WebView、ReactNative、Ionic 等；实际上国内常代指某一早期实现
 
-- obj 要定义属性的对象
-- prop 要定义或者修改属性的名称
-- descriptor 要被定义或者修改的属性描述符
+## hybrid js如何调用native接口？
 
-descriptor 属性描述符的形式：数据描述符、存取描述符，描述只能是两者之一
+例如使用 mWebView 的  @JavascriptInterface 定义 interface，调用为 window.Android.functionName()
 
-共同特性：
+## webpack编译和构建原理 ?
 
-- configurable 可设置性，能否被删除；除了 value 和 writable 之外的属性能否被修改，默认为 false； 能否修改为访问器属性
-- enumerable 能否在 for...in 循环和 Object.keys() 中被枚举，默认为 false
+流程概括：
 
-数据描述符：
+1. 初始化参数：从配置文件和 shell 语句中读取和合并参数，得到最终的参数
+2. 开始编译：用上一步得到的参数初始化 Compiler 对象，加载所有配置的插件，执行对象的 run 方法开始执行编译
+3. 确定入口：根据配置中的 entry 找到所有的入口文件
+4. 编译模块：从入口文件出发，调用所有配置的 Loader 对模块进行翻译，再找出该模块依赖的模块，递归本步骤直到所有入口依赖的文件都经过本步骤的处理
+5. 完成模块编译：在经过第四步使用 Loader 翻译完所有模块后，得到每个模块被翻译后的最终内容和他们之间的依赖关系
+6. 输出资源：根据入口和模块之间的依赖关系，组装成一个个包含多个模块的 chunk，将每个 chunk 转化成一个单独的文件加入到输出列表
+7. 输出完成：确定好输出内容后，根据配置确定输出的路径和文件名，把文件内容写入到文件系统
 
-- value 该属性对应的值，可以是任何有效的 JS 值，默认为 undefined
-- writable 当且仅当该属性的 writable 为 true 时，value 才能被复制运算符改变，默认为 false
+## babel转码流程 ？
 
-存取描述符：
+babel 及其插件会按照参数被加载到 Webpack 的 Compiler 对象中（使用 webpack + babel 的一般流程）
 
-- get 一个给属性提供 getter 的方法，如果没有 getter 则为 undefined。当访问该属性时，该方法被执行。方法执行时，只有 this 可用，无参数。默认为 undefined
-- set 一个给属性提供 setter 的方法，如果没有 setter 则为 undefined。当属性值修改时，触发执行该方法。将接受 = 后的值为参数。默认为 undefined
-
-## 对 Proxy 的理解？
-
-proxy 对象用于定义基本操作的自定义行为，如属性查找、赋值、枚举、函数调用等。相当于拦截并修改某些操作的默认行为。使用方法为 `const proxy = new Proxy(target, handler)`，其中：
-
-- target 是用 proxy 包装的目标对象
-- handler 是一个对象，其属性是当执行一个操作时，定义代理的行为的函数，也就是自定义行为；handler 可以为 {} 但是不能为 null，否则会报错
-
-proxy 的操作，其中 receiver 代表在原型链上最初被调用的对象, newTarget 表示最初被调用的构造函数
-
-- get(target, property, receiver) => getter
-- set(target, property, value, receiver) => setter
-- has(target, property) => in
-- getPrototypeOf(target) => getPrototypeOf
-- setPrototypeOf(target, prototype) => setPrototypeOf
-- isExtensible(target) => Object.isExtensible Reflect.isExtensible（必须是对象，否则报错）
-- preventExtensions(target) => Object.preventExtensions Reflect.preventExtensions
-- getOwnPropertyDescriptor(target, prop) => Object/Reflect.getOwnPropertyDescriptor
-- deleteProperty(target, property) => delete obj.prop, Reflect.deleteProperty
-- constructor(target, argumentsList, newTarget) => Reflect.construct new proxy(...args)
-- ownKeys(target) => Reflect.ownKeys Object.keys Object.getOwnPropertySymbols Object.getOwnPropertyNames
-- apply(target, thisArg, argumentsList) => proxy(...args) Function.prototype.apply Function.prototype.call Reflect.apply
-
-## Object.defineProperty 和 Proxy 的区别
-
-Object.defineProperty
-
-- 不能监听数组 length 的变化，因为它的 configurable 为 false
-- 不能监听对象的添加和删除
-- 只能劫持对象的属性
-
-Proxy
-
-- 可代理整个对象
-- 多达 13 种操作
+- 词法分析和语法分析，将字符串流转换成令牌流，再转换成 AST 树
+- 然后经由 Transformer（babel-traverse） 转换成目标语言的 AST 树，过程中有添加、更新和移除等操作；babel-traverse 使用 visitor 对象来供我们获取 AST 中具体节点，使用 path 表示对节点之间连接的访问
+- 最终使用 Generator（babel-generator）深度优先遍历，生成目标语言，同时还会按要求生成源码映射
 
 ## 什么是虚拟 DOM
 
@@ -2017,6 +1832,796 @@ babel 默认只转译语法，babel-polyfill 转换新 API 以保证兼容
 - splitChunks
 - 提取 css
 
+
+# 手写代码
+
+## 用 JS 描述一棵树
+
+```js
+// 二叉树
+class TreeNode {
+    constructor(value, left, right) {
+        this.value = value;
+        this.left = left;
+        this.right = right;
+    }
+}
+
+// 多叉树
+class TreeNode {
+    constructor(value) {
+        this.value = value;
+        this.children = [];
+    }
+}
+```
+
+## 深拷贝
+
+```js
+const isInTypes = function(obj, ...types) {
+    for(const t of types) {
+        const protoStr = Object.prototype.toString.call(t.prototype);
+        if( (Object.is(obj.constructor, t)) || 
+        ((protoStr!=='[object Object]') &&
+         (Object.prototype.toString.call(obj)===protoStr))
+        ) {
+            return true;
+        }
+    }
+    return false;
+}
+
+const isPrototype = function(value) {
+    return value === (value.constructor.prototype || Object.prototype);
+}
+
+const GeneratorFunction = Object.getPrototypeOf(function*(){}).constructor;
+
+const baseClone = function(obj, memo = new Map()) {
+    // for primitive
+    if(Object.is(obj, null) || (typeof obj!=='function' && typeof obj!=='object')) {
+        return obj;
+    }
+    // for memo
+    if(memo.get(obj)!==undefined) {
+        return memo.get(obj);
+    }
+    const ctor = obj.constructor;
+    let target = null;
+    // for wrapped primitive
+    if(isInTypes(obj, Number, String, BigInt)) {
+        target = new ctor(obj);
+    }
+    else if(isInTypes(obj, Boolean, Date)) {
+        target = new ctor(+obj);
+    }
+    else if(isInTypes(obj, Symbol)) {
+        target = Object(obj.valueOf());
+    }
+    else if(isInTypes(obj, Array)) {
+        target = new ctor(obj.length);
+        memo.set(obj, target);
+        target.splice(0, 0, Array.prototype.map.call(obj, item => baseClone(item, memo)));
+    }
+    else if(isInTypes(obj, Buffer, ArrayBuffer, SharedArrayBuffer)) {
+        console.log(obj);
+        target = obj.slice();
+    }
+    else if(ArrayBuffer.isView(obj)) {
+        target = new ctor(obj.buffer.slice(), obj.byteOffset, obj.byteLength);
+    }
+    else if(isInTypes(obj, Map)) {
+        target = new Map();
+        memo.set(obj, target);
+        obj.forEach((v, k)=> {
+            target.set(k, baseClone(v, memo));
+        });
+    }
+    else if(isInTypes(obj, Set)) {
+        target = new Set();
+        memo.set(obj, target);
+        for(const i of obj) {
+            target.add(baseClone(i, memo));
+        }
+    }
+    else if(isInTypes(obj, RegExp)) {
+        target = new ctor(obj.source, /\w+$/.exec(obj));
+        // skip: target.lastIndex = obj.lastIndex;
+    }
+    else if(isInTypes(obj, WeakMap, WeakSet, Error)) {
+        memo.set(obj, target);   
+        return {};
+    }
+    else {
+        if( !isInTypes(obj, Function, GeneratorFunction) && (typeof ctor==='function' && !isPrototype(obj))) {
+            target = Object.create(Object.getPrototypeOf(obj));
+        } else {
+            target = {};
+        }
+    }
+    // arguments function and objects
+    if(memo.get(obj)===undefined) {
+        memo.set(obj, target);
+    }
+    const props = Object.getOwnPropertyDescriptors(obj);
+    const newProps = {};
+    for(const k of Object.keys(props)) {
+        if(!target.hasOwnProperty(k)) {
+            newProps[k] = props[k];
+            newProps[k].value = baseClone(props[k].value, memo);
+            if(props[k].get) {
+                newProps[k].get = baseClone(props[k].get, memo);
+            }
+            if(props[k].set) {
+                newProps[k].set = baseClone(props[k].set, memo);
+            }
+        }
+    }
+    Object.defineProperties(target, newProps);
+    if(Object.isFrozen(obj)) {
+        Object.freeze(target);
+    }
+    if(Object.isSealed(obj)) {
+        Object.seal(target);
+    }
+    if(!Object.isExtensible(obj)) {
+        Object.preventExtensions(target);
+    }
+    return target;
+}
+```
+
+
+## 清除 float
+
+1. 添加新元素，应用 clear: both
+2. 父级 div 定义 overflow: auto 或者 hidden（根据 BFC 的规则，计算 BFC 高度时，浮动也参与计算）
+3. 使用 :after 伪类
+
+```css
+.clear{clear:both; height: 0; line-height: 0; font-size: 0}
+```
+
+```css
+.outer::after {
+    clear: both;
+    content: '';
+    display: block;
+    width: 0;
+    height: 0;
+    visibility: hidden;
+}
+```
+
+## 模拟 call
+
+假设为浏览器，非严格模式：
+
+```js
+Function.prototype.myCall = function(context, ...args) {
+    context = (context??window) || new Object(context);
+    const key = Symbol();
+    context[key] = this;
+    const result = context[key](...args);
+    delete context[key];
+    return result; 
+}
+```
+
+非浏览器，则 window 改为 global；严格模式，context 不需要判断和 new Object 转换，而在下文调用时注意判断 null 的情况；
+
+## 模拟 apply
+
+假设为浏览器，非严格模式：
+
+```js
+Function.prototype.myApply = function(context, args) {
+    context = (context??window) || new Object(context);
+    const key = Symbol();
+    context[key] = this;
+    args = args ? args: [];
+    // 应对类数组对象
+    if(!(args instanceof Array)){
+        const newArgs = [];
+        for(let i=0;i<args.length;i++) {
+            newArgs.push(args[i]);
+        }
+        args = newArgs;
+    }
+    const result = context[key](...args);
+    delete context[key];
+    return result;
+}
+```
+
+非浏览器和严格模式见上文
+
+## 模拟 bind
+
+假设为浏览器，非严格模式：
+
+```js
+Function.propotype.myBind  = function(context, ...args) {
+    const fn = this;
+    const bindFn = function(...newFnArgs) {
+        return fn.call(
+            // 应对被当做构造函数使用
+            this instanceof bindFn ? this : context,
+            , ...args, ...newFnArgs)
+    }
+    bindFn.prototype = Object.create(fn.prototype);
+    return bindFn;
+}
+```
+
+## 模拟 new
+
+假设为非严格模式：
+
+```js
+const createNew = (Con, ...args) => {
+    const obj = {};
+    Object.setPrototypeOf(obj, Con.prototype);
+    const result = Con.apply(obj, args);
+    return result instanceof Object ? result : obj;
+}
+```
+
+## 模拟 instanceof
+
+```js
+const myInstanceOf = (left, right) => {
+    let leftValue = Object.getPrototypeOf(left);
+    let rightValue = Object.prototype;
+    // Object.prototype === null
+    while(true) {
+        if(leftValue===null) {
+            return false;
+        }
+        if(leftValue===rightValue) {
+            return true;
+        }
+        leftValue = Object.getPrototypeOf(leftValue);
+    }
+}
+```
+
+## 手写 AJAX
+
+```js
+function formateData(data) {
+    const arr = [];
+    for(let key in data) {
+        arr.push(`${encodeURIComponent(key)}=${data[key]}`);
+    }
+    return arr.join('&');
+}
+
+function ajax(params) {
+    params = params || {};
+    params.data = params.data || {};
+    params.type = (params.type || 'GET').toUpperCase();
+    params.data = formateData(params.data);
+    const xhr = new XMLHttpRequest();
+    return new Promise((resolve, reject)=>{
+        xhr.onload = function() {
+            if(xhr.status===200 || xhr===304 || xhr.status===206) {
+                const res = JSON.parse(xhr.responseText);
+                if(params.success && params.success instanceof Function) {
+                    params.success.call(xhr, res);
+                }
+                resolve(res);
+            } else {
+                const res = JSON.parse(xhr.responseText);
+                if(params.error && params.error instanceof Function) {
+                    params.error.call(xhr, res);
+                }
+                reject(res);
+            }
+    }
+    })
+    if(params.type==='GET') {
+        xhr.open(params.type, `${params.url}?${params.data}`, true);
+        xhr.send();
+    }
+    else if(params.type==='POST') {
+        xhr.open(params.type, params.url, true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xhr.send(params.data);
+    }
+}
+```
+
+## 手写 JSONP
+
+```js 
+function formateData(data) {
+    const arr = [];
+        for (let key in data) {
+        arr.push(encodeURIComponent(key) + '=' + encodeURIComponent(data[key]))
+    }
+    return arr.join('&');
+}
+
+function jsonp(params) {
+    params = params || {};
+    params.data = params.data || {};
+    const callbackName = params.jsonp;
+    const head = document.querySelector('head');
+    const script = document.createElement('script');
+    params.data['callback'] = callbackName;
+    const data = formateData(params.data);
+    script.src = `${params.url}?${data}`;
+    window[callbackName] = (jsonData) => {
+        head.removeChild(script);
+        clearTimeout(script.timer);
+        delete window[callbackName];
+        params.success && params.success(jsonData);
+    }
+    if(params.time) {
+        script.timer = setTimeout(()=>{
+            window[callbackName] = null;
+            header.removeChild(script);
+            params.error && params.error({
+                message: 'time out'
+            });
+        }, params.time);
+    }
+    head.appendChild(script);
+}
+```
+
+## 手写快排
+
+```js
+function partition(arr, l, r) {
+    const pivot = arr[l];
+    while(l<r) {
+        while(arr[r] >= pivot && l < r) {
+            r--;
+        }
+        if(l<r) {
+            arr[l] = arr[r];
+            l++;
+        }
+        while(arr[l] <= temp && l < r) {
+            l++;
+        }
+        if(l<r) {
+            arr[r] = arr[l];
+            r--;
+        }
+    }
+    arr[l] = pivot;
+    return l;
+}
+
+function quickSort(arr, l, r) {
+    if(l<r) {
+        const boundary = partition(arr, l, r);
+        quickSort(arr, l, boundary);
+        quickSort(arr, boundary + 1, r);
+    }
+}
+```
+
+## 让 (a==1 && a==2 && a==3) 为 true
+
+### 利用隐式转换规则
+
+== 操作符在左右数据类型不一致的时候，会进行隐式转换，转换规则如下：
+
+- 如果部署 `[Symbol.toPrimitive]` 接口，那么调用此接口
+- 如果非 Date 类型，调用 valueOf，如果返回非基本数据类型，返回调用 toString，如果 toString 返回非基本类型，那么抛出错误
+- 如果 hint 为 string，调用顺序为 toString >>> valueOf
+- 如果 hint 为 number，调用顺序为 valueOf >>> toString
+
+```js
+const obj = {
+    [Symbol.toPrimitive]: (function(hint) {
+        let i = 0;
+        return () => i++;
+    })()
+}
+```
+
+```js
+const obj = {
+    reg: /\d/g,
+    valueOf: function(hint) {
+        return this.reg.exec('123')[0];
+    }
+}
+```
+
+### 利用数据劫持
+
+```js
+let i = 1;
+Object.defineProperty(window, 'a', {
+    get: function() {
+        return i++;
+    }
+});
+```
+
+```js
+const a = new Proxy({}, {
+    i: 1,
+    get: function() {
+        return () => this.i++;
+    }
+})
+```
+
+### 利用数组的 join 方法
+
+```js
+const a = [1, 2, 3];
+a.join = a.shift;
+```
+
+## 防抖函数作用、应用场景、实现
+
+debounce 每当执行调用之后，更新计时，只有到计时结束时，才能触发动作
+
+1. 调节窗口
+2. 字符输入
+3. 表单验证
+
+```js
+function myDebounce(fn, wait, immediate = true) {
+    let timer;
+    const later = (context, args) => setTimeout(()=>{
+        timer = null;
+        if(!immediate) {
+            fn.apply(context, args);
+        }
+    }, wait);
+    const debounced = function (...params) {
+        const context = this;
+        const args = params;
+        if(!timer) {
+            timer = later(context, args);
+            if(immediate) {
+                fn.apply(context, args);
+            }
+        } else {
+            clearTimeout(timer);
+            timer = later(context, args);
+        }
+    }
+    debounced.cancel = function() {
+        clearTimeout(timer);
+        timer = null;
+    };
+    return debounced;
+}
+```
+
+## 节流的作用、应用场景、实现
+
+throttle 规定一个时间，一段时间内只能执行一次：
+
+1. 按钮点击
+2. 拖拽事件
+3. 计算鼠标的距离
+
+时间戳实现：
+
+```js
+function throttle (func, delay) {
+    let lastTime = 0;
+    const throttled = throttled(...args) {
+        const context = this;
+        const nowTime = Date.now();
+        if(nowTime > lastTime + delay) {
+            func.apply(context, args);
+            lastTime = nowTime;
+        }
+    }
+    throttled.cancel = function() {};
+    return throttled; 
+}
+```
+
+计时器实现：
+
+```js
+function throttle(func, delay) {
+    let timeout = null;
+    const throttled = function(...args) {
+        const context = this;
+        if(!timeout) {
+            timeout = setTimeout(()=>{
+                func.apply(context, args);
+                clearTimeout(timeout);
+                timeout=null
+            }, delay);
+        }
+    }
+    throttled.cancel = function() {
+        clearTimeout(timeout);
+        timeout = null;
+    };
+    return throttled;
+}
+```
+
+## 异步加载 JS 脚本的方法有
+
+### defer/async 属性
+
+```html
+<script src="../xxx.js" defer/async></script>
+```
+
+- defer: 等到页面在内存中正常渲染结束，其它脚本完成执行，window.onload 之前执行，如果多个 defer，会按照顺序加载
+- async：下载完，渲染引擎中断渲染，执行该脚本后渲染，多个 async 不能保证顺序
+
+### preload/prefetch 预加载
+
+```html
+<link rel=preload/prefetch href="../xxx" as=media-type type=mime-type>
+```
+
+preload 提前获取之后该页面要使用的资源，prefetch 提前获取之后其它页面要使用的资源
+
+### 动态创建 script 标签
+
+```js
+let script = document.createElement('script');
+script.src = 'XXX.js';
+document.body.append(script);
+```
+
+### XHR 或者 fetch 异步加载 JS 并使用 eval 执行
+
+```js
+let xhr = new XMLHttpRequest();
+xhr.open("get", "js/xxx.js",true);
+xhr.send();
+xhr.onreadystatechange = function() {
+    if (xhr.readyState == 4 && xhr.status == 200) {
+        eval(xhr.responseText);
+    }
+}
+```
+
+### import() 结合 fetch
+
+## 实现 flattenDeep 函数，将嵌套数组扁平化
+
+### arr.flat
+
+```js
+function flattenDeep(arr, deepLength) {
+    if(deepLength>Number.MAX_SAFE_INTEGER) {
+        deepLength = Number.MAX_SAFE_INTEGER;
+    }
+    return arr.flat(deepLength);
+}
+```
+
+### reduce 和 concat
+
+```js
+function flattenDeep(arr) {
+    return arr.reduce((acc, val)=> Array.isArray(val) ? arr.concat(flattenDeep(val)): acc.concat(val), []);
+}
+```
+
+### 利用 stack 实现
+
+
+## Promise.all 用法和实现
+
+Promise.all(PromiseArray).then() 等待全部任务完成后执行，或者出现第一个失败
+
+```js
+function myPromiseAll(arr) {
+    return new Promise((resolve, reject)=>{
+        const result = new Array(arr.length);
+        arr.forEach((p, index)=>{
+            Promise.resolve(p).then(d=>{
+                result[index] = d;
+                count ++;
+                if(count===arr.length) {
+                    resolve(result);
+                }
+            }, err=> reject(err));
+        });
+    });
+}
+```
+
+## 实现 `JSON.stringify`
+
+```js
+function jsonStringify(data, set) {
+    const dataType = typeof data;
+    if (dataType!=='object') {
+        if(Number.isNaN(data) || data===Infinity || data===-Infinity) {
+            return "null";
+        } else if(dataType==="function" || dataType==="symbol" || dataType==="undefined") {
+            return "undefined";
+        } else if(dataType==="string") {
+            return `"${data}"`;
+        } else if(data.toString && typeof data.toString === "function") {
+            // such as bigint
+            return data.toString();
+        } else {
+            // unreachable in es10
+            return "undefined";
+        }
+    } else {
+        if(data===null) {
+            return "null";
+        } else if(data.toJson && typeof data.toJson === "function") {
+            return jsonStringify(data.toJSON());
+        } else if(data instanceof Array) {
+            const result = [];
+            data.forEach((item)=>{
+                const itemType = typeof item;
+                if(itemType === "undefined" || itemType==="function" || itemType === "symbol") {
+                    result.push("null");
+                } else {
+                    result.push(jsonStringify(item));
+                }
+            });            
+            result = `[${result}]`;
+            return result.replace(/'/g, '"');
+        } else {
+            if(set) {
+                set = new Set();
+            }
+            if(set.get(data)!==null) {
+                return "undefined";
+            }
+            set.add(data);
+            const result = [];
+            Object.keys(data).forEach((item)=>{
+                if(typeof item!=='symbol') {
+                    if (data[item] !== undefined && typeof data[item] !== 'function'
+                        && typeof data[item] !== 'symbol') {
+                        result.push('"' + item + '"' + ":" + jsonStringify(data[item], new Set(set)));
+                    }
+                }
+            });
+            return ("{" + result + "}").replace(/'/g, '"');
+        }
+    }
+}
+```
+
+## 实现 JSON.parse
+
+```js
+(new Function('return'+json))();
+```
+
+基于 eval，必要时需要做过滤，避免 XSS
+
+## 实现 Observable 和 Subject
+
+### Observable:
+
+```js
+function myObservable(observer) {
+    const datasource = new DataSource();
+    datasource.ondata(e) => observer.next(e);
+    datasource.onerror(err) => observer.error(err);
+    datasource.oncomplete() => observer.complete();
+    return () => {
+        datasource.destroy();
+    };
+}
+```
+
+观察者约定：
+
+1. 不在 complete 或者 error 后调用 next
+2. 取消订阅后，不能使用任何方法
+3. 调用 complete 和 error 需要取消订阅逻辑
+4. 如果 next、complete 或者 error 处理方法抛出异常，要调用取消订阅逻辑，以确保不会泄露资源
+5. next、error 和 complete 实际上都是可选的。你无需处理每个值、错误或完成。你可能只是想要处理其中一二
+
+### Subjects 实现
+
+```js
+class MySubject extends Rx.Observable {
+ 
+ constructor() {
+   super();
+   this.observers = [];
+ }
+ 
+ subscribe(observer) {
+   this.observers.push(observer);
+ }
+ 
+ next(value) {
+   this.observers.forEach(observer => observer.next(value));
+ }
+ 
+ error(error) {
+   this.observers.forEach(observer => observer.error(error));
+ }
+ 
+ complete() {
+   this.observers.forEach(observer => observer.complete());
+ }
+ 
+}
+```
+
+## 用 CSS 写无限循环动画
+
+```css
+@keyframes example {
+    from { background: red; }
+    to { background: blue; }
+}
+
+#example1 {
+    width: 10px;
+    height: 10px;
+    animation-timing-function: ease-in;
+    animation-name: example;
+    animation-duration: 1s;
+    animation-iteration-count: infinite;
+}
+```
+
+## Promise.race 及其实现
+
+只要有一个参数 fullfilled 或者 reject，则 fullfilled 或者 rejected
+
+实现：
+
+```js
+function myRace(iterable) {
+    const arr = Array.from(iterable);
+    return new Promise((resolve, reject)=> {
+        if(arr.length===0) {
+            return resolve();
+        }
+        arr.forEach(p=> Promise.resolve(p).then((d)=>resolve(d), err=>reject(err)));
+    });
+}
+```
+
+## 数组去重
+
+```js
+function unique(array) {
+    return [...new Set(array)];
+}
+```
+
+其它方法时间复杂度较高
+
+## 编写通用 currying
+
+```js
+function currying(fn, ...args) {
+    return (...others) => fn(...args, ...others);
+}
+```
+
+## 大文件上传实现？
+
+基本思路：文件分块，每块计算 MD5，块向后端传输，后端返回 MD5，验证符合后表明该块传递成功，否则失败；整体传输完毕后，计算整体的 MD5，成功则成功，否则失败。
+
+断点续传：记录成功传递的块的 MD5，重新建立连接时，验证这些 MD5。验证失败的和未验证的重传。
+
+安全问题：避免过多上传导致服务器崩溃，可设置缓存队列、大小检查和超时时间，还可以由服务器给客户端发送 token 记录，客户端上交 token 记录。
+
+并发：多个异步任务即可，完成后修改计数。
+
+# HTML & CSS & 样式
+
 ## 伪类和伪元素
 
 - 伪类用于当已有元素处于某个状态时，为其添加对应的样式
@@ -2071,198 +2676,166 @@ styled-components，发挥 js 的强大性
 
 重排和重绘
 
-## 浏览器里除了 js 还能运行什么
+## 使用 CSS 让一个元素水平垂直居中
 
-webassembly
+### 利用 flex 布局
 
-## 浏览器如何缓存
+```css
+.container {
+    display: flex;
+    aligh-items: center;
+    justify-content: center;
+}
+```
 
-1. localStorage/sessionStorage/indexDB
-2. ServiceWorker/CacheAPI
-3. 设置 http 的头部 Cache-Control Expires
+### 子元素是单行文本
 
-## 详述http 1.0, 1.1, 2.0的区别
+```css
+.container {
+    height: 100px;
+    line-height: 100px;
+    text-align: center;
+}
+```
 
-1. HTTP/1.0 - 特性：
-    - 协议信息随着每个请求发送
-    - 状态码在响应开始时发送
-    - 引入 HTTP 头
-    - 可以使用 Content-Type 头来传输除 HTML 文件外其他类型文档的能力
-2. HTTP/1.1
-    - 特性：
-        - 连接可以复用
-        - 增加流水线
-        - 支持响应分块
-        - 引入缓存控制
-        - 引入内容协商
-        - 使用 Host 头，使得不同域名可以配置在同一个 IP 地址的服务上
-    - 拓展：
-        - 用于安全传输：SSL 和 TLS
-        - 用于复杂应用：
-            - REST
-            - Server-sent events
-            - WebSocket
-        - 放松 Web 的安全模型：CORS、DNT、CSP
-3. HTTP/2 - SDPY
-    - 特性：
-        - HTTP/2 是二进制协议。不可再读，也不可无障碍的手动创建
-        - 并行的请求能够在一个链接中处理，移除了 1.x 中的顺序和阻塞（但是仍然存在队首阻塞）
-        - 压缩了 headers，一系列的请求中部分 headers 可以压缩
-        - 允许服务器在客户端缓存中填充数据，通过有限的服务器推送机制来提前请求
-    - 拓展：
-        - 对 Alt-Src 的支持允许了给定资源的位置和资源鉴定，允许更加智能的 CDN 缓存机制
-        - Client-Hints 的引入允许客户端和服务器主动交流它的需求和硬件约束的信息
-        - 在 Cookie 头中引入安全相关的前缀，可以帮助一个安全的 Cookie 没有被修改过
+### 利用 absolute + transform
 
-## 详述TCP如何保证传输完整性
+```css
+.container {
+    position: relative;
+}
 
-- 定时器 + ACK + 重传
-- 首部校验和
-- 重排序
-- 流量控制
-- 序号丢弃重复
-- 有连接
+.box {
+    top: 50%;
+    left: 50%;
+    transform: translate(50%, 50%);
+}
+```
 
-## UDP和TCP有什么区别
+### 利用 grid 布局
 
-- TCP：有连接，可靠，流控
-- UDP： 无连接，不可靠
+```css
+.container {
+    display: grid;
+}
 
-## 为什么使用 UDP
+.box {
+    justify-self: center;
+    align-self: center;
+}
+```
 
-- 可靠性排序靠后
-- 时效性较重要
-- 减少流控的影响
+### 利用绝对定位和 margin: auto
 
-## WebSocket？
+```css
+.container {
+    position: relative;
+}
+.box {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: auto;
+}
+```
 
-复用 http 1.1 的握手协议，完成后后续交换按照 WebSocket 协议。
+## 如何隐藏页面中元素
 
-首部：
+- display: none 不占据空间的完全隐藏
+- hidden 属性，CSS3 新增，不占据空间，完全隐藏
+- position：absolute/fixed + left/top: -9999999px，向左、上移动，不占空间
+- position: relative + left/top: -9999999px，占据空间，若要不占空间，可以设置 height: 0
+- margin-left: -999999px; 占据空间
+- transform 
+    - scale(0) 不占空间
+    - translateX/Y(-9999999px) 占据空间，可设置 height
+    - rotateX/Y(90deg) 占据空间
+- height: 0, width: 0, line-height: 0, font-size: 0, overflow: hidden 不占空间
+- opacity: 0 占据空间
+- visibility: hidden 占据空间
+- z-index: -999 + position: relative 占据空间
+- clip-path: polygon(0 0, 0 0, 0 0, 0 0); 占据空间
+- aria-hidden 属性，语义上隐藏，占空间可见
 
-- Connection: Upgrade 表示升级协议
-- Upgrade: websocket 表示升级到 Websocket
-- Sec-WebSocket-Version: 13 表示支持的版本号，如果服务器不支持，需要返回其 Sec-WebSocket-Version
-- Sec-WebSocket-Key 与响应的 Sec-WebSocket-Accept 配套
+## HTML5 语义化的理解
 
-## 分布式系统用什么算法排序？
+优点：
 
-map-reduce、归并
+- 代码结构清晰，易于理解、开发和维护
+- 利于屏幕阅读器和爬虫等其他类型客户代理阅读
+- 有益于 SEO
 
-## hybrid是什么？
+标签：
 
-抽象上说是混合模式移动应用，常见的有 原生 + WebView、ReactNative、Ionic 等；实际上国内常代指某一早期实现
+- title
+- header
+- nav
+- main
+- section
+- article
+- h1-h6
+- ul/ol/li
+- table/thead/tbody/tfoot/...
+- aside
+- figure
+- picture
+- details
+- mark
+- dialog
+- address
+- img/audio/video/canvas/picture/source
 
-## hybrid js如何调用native接口？
+## 如何理解 BFC？BFC 的布局规则为？如何创建 BFC？
 
-例如使用 mWebView 的  @JavascriptInterface 定义 interface，调用为 window.Android.functionName()
+### 如何理解 BFC
 
-## webpack编译和构建原理 ?
+盒子是 CSS 引擎根据文档中内容所创建的，不同类型的盒子在文档上占据不同类型的上下文。格式化上下文是页面的一块渲染区域及其渲染规则，包括它子元素的定位以及其自身与其它盒子的关系。一个块级盒子一定会参与格式化上下文的创建。
 
-流程概括：
+### BFC 的布局规则为
 
-1. 初始化参数：从配置文件和 shell 语句中读取和合并参数，得到最终的参数
-2. 开始编译：用上一步得到的参数初始化 Compiler 对象，加载所有配置的插件，执行对象的 run 方法开始执行编译
-3. 确定入口：根据配置中的 entry 找到所有的入口文件
-4. 编译模块：从入口文件出发，调用所有配置的 Loader 对模块进行翻译，再找出该模块依赖的模块，递归本步骤直到所有入口依赖的文件都经过本步骤的处理
-5. 完成模块编译：在经过第四步使用 Loader 翻译完所有模块后，得到每个模块被翻译后的最终内容和他们之间的依赖关系
-6. 输出资源：根据入口和模块之间的依赖关系，组装成一个个包含多个模块的 chunk，将每个 chunk 转化成一个单独的文件加入到输出列表
-7. 输出完成：确定好输出内容后，根据配置确定输出的路径和文件名，把文件内容写入到文件系统
+- 内部，盒子依次垂直排列
+- 两个盒子的距离由 margin 决定，上下相邻的 margin 会发生重叠（其实内部接触也会重叠）
+- BFC 内每个盒子的左 margin-left-edge 接触外部盒子的 content-left-edge，即使在左浮动情况下也是如此
+- BFC 内的行上下文会自动伸缩以适应两侧浮动
+- BFC 内计算好后，不会影响外部元素
+- 计算 BFC 高度时，浮动元素也会计算
 
-## babel转码流程 ？
+### BFC
 
-babel 及其插件会按照参数被加载到 Webpack 的 Compiler 对象中（使用 webpack + babel 的一般流程）
+- 根元素
+- 浮动元素
+- position: absolute 或者 fixed
+- display: block, inline block, table-cell, table-caption, inline table, display: flow-root, contain: layout/content/paint 的元素，弹性元素、网格元素、多列元素, overflow: visible
+- 匿名块盒子
 
-- 词法分析和语法分析，将字符串流转换成令牌流，再转换成 AST 树
-- 然后经由 Transformer（babel-traverse） 转换成目标语言的 AST 树，过程中有添加、更新和移除等操作；babel-traverse 使用 visitor 对象来供我们获取 AST 中具体节点，使用 path 表示对节点之间连接的访问
-- 最终使用 Generator（babel-generator）深度优先遍历，生成目标语言，同时还会按要求生成源码映射
+## 如何响应式布局
 
-## js 哈希存储结构的构成方式 ?
-
-hash 常用构造方法：
-
-1. 直接地址法
-2. 除数留余法
-3. 数字分析法
-4. 平方求和法
-5. 分段求和法
-
-哈希冲突的解决方法：
-
-1. 开放定址法：可能造成二次聚集，装填因子较小
-    - 线性探测再散列
-    - 二次探测再散列
-    - 伪随机探测再散列
-2. 再 hash 法：增加了计算时间
-3. 链地址法：处理简单，无堆积；适用于无法确定表长，各节点动态申请，适合于造表前无法确定表长；需要额外空间
-4. 公共溢出区
-
-Map、Set、WeakSet、WeakMap 小于八个线性查找，多于之后变成 hashmap。在 V8 中，散列码是一个随机数，与对象无关，不能重新计算它。对于将 JS 对象作为 key 的情况，V8 将哈希码作为私有对象存储在对象上。V8 的私有符号和 Symbol 类似，但是不可枚举，只能在 V8 内部使用。
-
-- 当属性存储是空的时候，可以直接在 JSObject 的偏移量上存储 hashcode
-- 当属性存储是数组：
-    - 最低有效位是指针标志位，其余 31 位表示实际整数值，最大小于 2^31 的整数在 JS 上更加高效；- 通常数组将长度存储为 SmallInteger ，因此最大长度为 10 比特即可表示，可以使用剩下的 21 位来存储 hashcode
-- 当属性是字典：将字典大小增加一个字，以便将哈希吗存储在字典起始位置的专用槽中
-
-## OAUTH、JWT、Open?
-
-见认证、授权和凭证
-
-## XSS，CSRF，数据库注入怎么防范？
-
-XSS：控制前端渲染
-CSRF：控制后端处理
-数据库注入：预编译
-
-## Angular 脏数据检测的原理
-
-早期 angular 使用从树顶到底下进行脏检查，每个组件拥有自己的检查函数
-
-zone.js 对异步事件做代理包裹。ApplicationRef 类，监听 ngZone 中的 onTurnDone 事件，只要触发事件，执行 tick 方法对变更做检测
-
-## 浏览器 & HTTP 缓存策略
-
-### 强缓存
-
-指在缓存期间，请求不会发送到放服务器，浏览器直接返回缓存结果，需要设置 Header：
-
-- Expires：是 HTTP/1.0 中用于控制网页缓存的字段，表示过期时间；此时使用的是客户端时间和缓存失效时间对比，当用户修改客户端时间时可能导致强缓存失效
-- Cache-Control：是 HTTP/1.1 中设置的。其常见值为：
-    - public 所有内容都被缓存（客户端和代理服务器）
-    - private 所有内容只有客户端可以缓存，默认为 private
-    - no-cache 客户端缓存内容，但是否使用缓存需要经过协商来决定
-    - no-store 所有内容都不会被缓存
-    - max-age=xxx 缓存内容将在 xxx 秒后失效
-
-上述两者同时存在，只有后者生效；其仅仅为兼容作用
-
-### 内存缓存和磁盘缓存
-
-1. 大文件，优先缓存到 disk，否则 mem
-2. 当内存占用率高时，优先缓存到 disk
-
-### 协商缓存
-
-当请求没有命中缓存，或者强缓存失效后，需要向服务器发起请求，验证资源是否有更新。如果资源没有改变，返回 304，并更新浏览器缓存有效期；资源改变，返回 200 响应码，并返回响应资源，并更新浏览器缓存有效期。使用的 HTTP 头如下：
-
-1. Last-Modified & If-Modified-Since：前者表示文件最后的修改日期，由服务器添加到响应头中；后者由浏览器添加到请求头中，是上次该资源的 Last-Modified 值。浏览器收到请求后，会将后者和服务器上该文件修改时间戳对比，如果超过缓存时间，那么返回最新的资源，200 状态码；缺点如下：
-    - 如果文件打开过，修改时间会发生改变，导致该对失效
-    - 精确度只有一秒
-2. etag 和 If-None-Match：etag 类似文件指纹，由服务器添加到响应头中，浏览器会在请求头中添加 If-none-match 头，和 etag 比较；如果不一样，则返回 200 和资源；如果一样，返回 304。
-
-当任意缓存策略都没有设置，浏览器会采取启发式策略，通常会读取 Response Header 中的 date 头，减去 Last-Modified 值的 10% 作为缓存时间。
-
-### 实际场景
-
-对于频繁变动的资源：
-
-1. 完全不缓存: no-store
-2. 协商缓存：cache-control：no-cache，是浏览器每次都会走服务器，然后配合 etag 或者 last-modified 来验证资源是否有效，这样对于完全不缓存来说，虽然无法减少 HTTP 请求次数，可以显著减少响应数据大小。
-
-文件：
-
-1. HTML 文件不设缓存；
-2. CSS、JS 等文件可以设置一个较长的缓存期，比如一年，使用文件名_hash 的方法来更新文件；
+- 媒体查询
+    - 设置 viewport
+    - 选择屏幕大小分割点
+    - 针对不同的范围和类型的设备，复用部分资源，设置不同的网页
+- 百分比布局
+    - 计算困难
+    - 复杂：position 类型，元素类型和属性类型都可能造成负面影响，有副作用
+- rem 布局
+    - 思想：
+        1. 一般不给元素设置具体的宽度
+        2. 高度可以按照设计图固定值设计
+        3. 所有设置固定的时候用 rem 做单位
+        4. JS 设置真实屏幕的宽度，除以设计稿的宽度，作出比例
+    - 缺点：
+        1. 必须通过 JS 来动态控制根 font-size 大小，存在 JS 和 CSS 的耦合性
+- 视口单位：
+    - 思想：使用 vm 和 vh，vmin 和 vmax 来布局
+- 图片响应式
+    - srcset/src
+    - background-image
+    - picture
+- 成型方案：
+    - flex
+    - grid
+    - columns
 
 ## 低版本 IE 的盒模型和 W3C 的盒模型有什么区别？
 
@@ -2319,10 +2892,6 @@ IE 老版本声明 DOCTYPE 会使得变为 W3C
 4. hover 鼠标悬停
 
 可以改变 LVHA 的活动顺序保证在超链接访问过后，hover 仍然出现
-
-## 移动端的点击事件延迟 300 毫秒？
-
-判断用户是否再次点击屏幕
 
 ## CSS3 新增伪类？
 
@@ -2575,26 +3144,6 @@ le=1.0,user-scalable=no"/>
 
 1. display: flex; flex-direction: column; flex-grow: 1;
 2. 容器使用 relative 内部使用 position: absolute; top: 100px; bottom: 0; left: 0; right: 0;
-
-## png、jpg、gif、webp、heic、bmp 等图片的使用
-
-1. bmp 无损，支持索引色和直接色的点阵图。几乎没有压缩数据。
-2. gif 无损，索引色，点阵图。LZW 算法，支持透明，大小小，色彩素质低，支持动图。
-3. jpeg，有损，直接色，点阵图。不支持透明，压缩率较高。
-4. png-8，无损、索引色、点阵图。支持透明，不支持动画，压缩率较低。
-5. png-24，无损，直接色，点阵图。支持透明，压缩率较低。
-6. svg，无损、矢量图。
-7. webp，支持有损、无损，直接色，点阵图。支持透明，压缩率较高。
-8. heic，有损、无损，直接色，点阵图。支持透明，压缩率更高。
-
-## 判断浏览器是否支持 webp
-
-- 创建 image 对象，设置 src，判断是 onload 还是 onerror
-- canvas 判断，创建 canvas 对象，通过 canvas 的 toDataURL 设置为 webp 格式，判断返回值中是否含有 imgae/webp 字段，如果包含则支持 webP 反之不支持。
-
-## 什么是 Cookie 隔离？
-
-网站请求相同域名的静态资源会带上 cookie 信息，非常浪费资源。隔离操作：使用非主域名承载静态资源
 
 ## style 标签卸载 body 前后
 
@@ -2851,123 +3400,6 @@ p: after {
 6. clip-path 隐藏，不响应监听事件
 7. transform: scale(0,0) 实现缩放，不响应绑定的监听事件
 
-## 输入 URL 到渲染完成
+## 什么是 CSSOM？
 
-域名解析-TCP分包-IP寻路-握手-滑动窗口传输-持久化连接-挥手-解析-构建dom树与cssom-构建渲染树-回流-重绘-渲染
-
-## 浏览器一个tab页卡住了，为什么其他tab没事 
-
-chrome 使用多个进程来隔离不同的网页，保证安全性、健壮性和响应速度，但也造成了内存较大的损失。
-
-## 浏览器有哪些线程
-
-- GUI 渲染线程：负责渲染界面的 HTML 元素，当页面回流或者重绘时，该线程会执行；在脚本执行期间，该线程挂起
-- JavaScript 引擎线程：负责处理 JS 脚本程序，例如 V8 引擎
-- 定时器触发线程：为保证计时的准确性
-- 事件触发线程：当一个事件触发时，该线程会把事件添加到待处理队列的队尾，等待 JS 引擎的处理。
-- 异步 HTTP 请求线程：在 XMLHttpRequest 连接后，浏览器新开一个线程请求，检测的状态变更后，如果设置有回调函数，异步线程就产生状态变更事件放到 JS 引擎的处理队列中等待处理
-
-## 大文件上传实现？
-
-基本思路：文件分块，每块计算 MD5，块向后端传输，后端返回 MD5，验证符合后表明该块传递成功，否则失败；整体传输完毕后，计算整体的 MD5，成功则成功，否则失败。
-
-断点续传：记录成功传递的块的 MD5，重新建立连接时，验证这些 MD5。验证失败的和未验证的重传。
-
-安全问题：避免过多上传导致服务器崩溃，可设置缓存队列、大小检查和超时时间，还可以由服务器给客户端发送 token 记录，客户端上交 token 记录。
-
-并发：多个异步任务即可，完成后修改计数。
-
-## HTTPS 安全问题
-
-```config
-Client                          Server
-  | ----> (1) Client Hello ---->   |
-  | <---- (2) Server Hello <----   |
-  | <---- (3) Certificate  <----   |
-  | <---- (4) Server Key Exchange  |
-  | ----- (5) Server Hello Done    |
-  | ----> (6) Client Key Exchange  |
-  ---------------------------------- Part. 1
-  | ----> (7) Change Cipher Spec   |
-  | ----> (8) Finish       ---->   |
-  | <---- (9) Change Cipher Spec   |
-  | <---- (10) Finish      -----   |
-  ---------------------------------- Part. 2
-        Shakehand Finish
-```
-
-1. 密钥交换与密钥协商：TLS1.3 会将制作密钥需要的材料预先发给服务器
-    1. Client Hello： 
-        - \[Version/Random/SessionId/Cipher Suite/Compression Method/Extensions\]
-    2. Server Hello: 
-        - \[Version/Random/SessionId/Cipher Suite/Compression Method（存在安全漏洞，在 TLS1.3 中被禁用）/Extensions\]
-    3. Certificate：服务器将证书发送给客户端
-    4. Server Key Exchange
-    5. Server Hello Done
-    6. 计算预主密钥，Client Key Exchange
-    7. 计算主密钥：对称加密算法中，相同的密钥的情况下，中间人可以通过对双方流量监听，获得明文（RC4 算法）；MAC 用于防止篡改
-        - 客户端写入加密密钥：客户端来加密数据，服务器来解密数据
-        - 服务器写入加密密钥：服务器来加密数据，客户端来解密数据
-        - 服务器写入 MAC 密钥：客户端创建 MAC，服务器用来验证 MAC
-        - 客户端写入 MAC 密钥：服务器创建 MAC，客户端用来验证 MAC
-2. 通信测试：服务器通过 Change Cipher Spec 报文通知服务器接下来的报文会用协商好的密码套件加密，然后将加密好的套件通过 Finish 发送给服务器。服务器接收验证数据，用密钥解密，先发送 Change Cipher Spec 报文通知客户端会用协商好的密码套件加密，然后将加密过的验证数据通过 Finish 报文传输给客户端。
-    1. TLS 会话复用：服务器将加密过的 SessionID 发给客户端，客户端发送的 SessionId 可以解密则可跳过协商阶段
-    2. 密码套件：
-        - 密钥交换协议：规定通信双方如何交换通信时使用的对称加密算法的密钥。影响 Server/Client Key Exchange
-        - 对称加密算法：规定双方通信时如何加密信息。影响通信测试和正常通信。
-        - 消息认证码算法：规定如何对内容进行哈希，生成 MAC。用于保证消息传输过程中不被篡改
-        - 伪随机算法：用于生成主密钥和相关密钥
-
-## RTT 问题？
-
-tcp 1.5 RTT
-tls 1.5 RTT/ tls1.3 1 RTT
-http 1 RTT
-
-http1.x = 2.5RTT
-https + http1.x  = 4RTT
-http2 = 队首 4RTT / 其它 1RTT（重用 TCP 连接，但有队首阻塞）
-http3/quic
-    - 页面整体加载时间 1RTT + 1RTT
-    - 重连时间 1RTT
-
-## React 面试题
-
-1. 类组件和函数组件之间的区别
-    - 类组件可以使用 state 和钩子等特性
-    - 函数式组件是建立 props 和页面渲染之间的映射的函数，也可以使用 hooks 接口实现部分上述功能
-2. React 中的 refs？
-    - 提供一种访问在 render 方法中创建的 DOM 节点或者其他 React 函数的方法。即这些元素的引用。
-3. React 中如何处理事件？
-    - 为了解决跨浏览器的兼容性问题，SyntheticEvent 实例被传递给事件处理函数，它是跨浏览器的事件包装器，拥有和浏览器原生事件相同的接口
-4. state 和 props 的区别？
-    - state 是组件自己管理的数据，控制自己的状态，可变
-    - props 是外部传入的数据参数，不可变
-5. 如何创建 refs？
-    - 类组件：
-        - 声明及初始化：`this.myRef = React.createRef();`
-        - 绑定： `<div ref={this.myRef}></div>`
-        - 函数绑定：`<div ref={this.input = input}></div>`
-    - 函数式组件及 hooks：
-        - 声明和初始化 `const ref = useRef(null);` 
-        - 函数绑定 `<div ref={(divRef)=>ref.current = divRef}></div>`
-        - 绑定 `<div ref={ref}></div>`
-6. 什么是高阶组件？
-    - 是接受并返回一个新组件的函数
-    - 可以动态接受任何提供的子组件，但不会修改或者复制输入组件中的任何行为
-7. 在构造函数调用 super 并将 props 作为参数传入的作用是？
-    - 在调用 super() 之前，子类构造函数无法使用 this 引用（ES6 知识）
-8. 什么是控制组件？
-    - React 在诸如表单元素等元素时，包含表单的组件将跟踪其状态的输入值，并在每次回调函数触发时重新渲染组件。以这种方式由 React 控制其值的输入表单元素称为控制组件
-9. React.createElement？
-    - 参数：
-        tag 或者组件名
-        选项
-        子节点
-10. 什么是 JSX？
-    - 新的语法糖，主要用于在 JavaScript 中直接加入 XML 内容，主要被 React 使用
-11. @TODO
-
-## 深拷贝
-
-@TODO
+CSS Object Model 是一组允许用JavaScript操纵CSS的API。 它是继DOM和HTML API之后，又一个操纵CSS的接口，从而能够动态地读取和修改CSS样式
