@@ -378,3 +378,63 @@ $Unit$ 类型经常被用来做某些无趣实参和结果的填充物，它在�
 ![TypeSystem Table 22](./typesystems_table_22.png "TypeSystem Table 22")
 
 规则 $(Env\ ...)$，$(Type\ ...)$ 和 $(Expr\ ...)$ 使我们在 $F_1$ 中看到的规则的直接变体（variation）。规则 $(Decl\ ...)$ 处理声明的类型。规则 $(Comm\ ...)$处理命令；注意 $(Comm\ Block)$ 在检查块体时如何将签名转换为一块环境。
+
+# 5. 二阶类型系统
+
+许多现代化语言都包括类型参数、类型抽象或者两者兼而有之的构造。类型参数可以在一些语言的模块系统中找到，其中一个通用模块、类或接口被一个类型参数化，以便以后提供。`Java` 和 `C#` 扩展在类和接口级使用类型参数。（`C++` 的模板类似于类型参数，`bur` 其实是宏扩展的一种形式，属性很不一样)。多态语言如 `ML` 和 `Haskell` 更普遍地使用类型参数，在函数级。类型抽象可以与模块相结合，在接口中以不透明类型的形式出现，如 `Modula-2` 和 `Modula-3` 。`CLU` 等语言在数据级使用类型抽象，获得抽象的数据类型。这些高级功能可以用所谓的二阶类型系统来建模。
+
+二阶类型系统使用一种类型参数的记号拓展了一阶类型系统。一种新的项，写作 $\lambda X.M$，标识对一个代表任意类型的变量 $X$ 进行参数化的程序 $M$。例如，一个固定类型 $A$ 的表示函数，写成 $\lambda x: A.x$，可以通过抽象在 $A$ 上写入 $id \overset{\triangle}{=} \lambda X.\lambda x: X.x$ 的方式，变成一个参数化的标识函数。然后，我们可以通过类型实例化，将这样一个参数函数实例化到任何给定的类型 $A$ 上，写成 $id\ A$，从而产生回 $\lambda x: A.x$。
+
+对于新的项 $\lambda X.M$，我们需要新的普遍量化的类型（universally quantified types）。类似 $\lambda X.M$ 的一个项的类型些 $\forall X.A$，意味着对于所有 $X$，其体 $M$ 具有类型 $A$ （这里 $M$ 和 $A$ 可能包含 $X$ 的出现）。例如，$identity$ 的参数 $id: \forall X.X\rightarrow X$。因为对于所有的类型 $X$， 类型实例 $id X$ 具有类型 $X \rightarrow X$。
+
+纯二阶系统 $F_2$ （表 23）完全基于变量类型、函数类型和量化类型。注意到我们放弃了基本类型 $K$。因为我们现在可以使用类型变量作为基本情况。事实证明，几乎所有感兴趣的基本类型都可以在 $F_2$ 中进行编码 [4]。同样，乘积类型、和类型、存在类型和一些递归类型，都可以在 $F_2$ 内编码。多态具有惊人的表达能力。因此，在技术上，几乎没有必要直接处理这些类型构造。
+
+
+![TypeSystem Table 23](./typesystems_table_23.png "TypeSystem Table 23")
+
+$F_2$ 的类型和项的自由变量可以用通常的方式（fashion）来定义：不妨说 $\forall X.A$ 在 $A$ 中绑定 $X$，$\lambda X.M$ 在 $M$ 中绑定 $X$ 即可。$F_2$ 的一个有趣的方面是在类型实例化的类型变量的替换。$(Val\ Appl2)$
+
+![TypeSystem Table 24](./typesystems_table_24.png "TypeSystem Table 24")
+
+
+![TypeSystem Table 25](./typesystems_table_25.png "TypeSystem Table 25")
+
+$F_2$ 的判别（表 24）与 $F_1$ 的相同，但是环境更加丰富。关于 $F_1$ ，新的规则（表 25），是 $(Env\ X)$：将类型变量添加到环境中；$(Type\ Forall)$，从变量 $X$ 和 $X$ 可能出现的类型 $A$ 中构造出一个量化的类型 $\forall X.A$; $(Val\ Fun2)$，建立一个多态抽象；以及 $(Val\ Appl2)$，将一个多态抽象实例化到给定的类型中，其中 $[B/X]A$ 是 $B$ 对 $A$ 中 $X$ 的所有自由出现的替换。例如，如果 $id$ 具有类型 $X.X \rightarrow X$，$A$ 是一个类型，那么由 $(Val\ Appl2)$ 我们可以得到 $id A$ 具有类型 $[A/X]{(X\rightarrow X)}\equiv A \rightarrow A $。作为一个简单但有指导意义的联系，读者不妨构建 $id(\forall X.X \rightarrow X)(id)$ 的推导。
+
+作为 $F_2$ 的拓展，我们可以采用我们已经讨论过的 $F_1$ 的所有一阶结果。一个更有趣的拓展是存在量化类型（existentially quantified types），也称为类型抽象。
+
+![TypeSystem Table 26](./typesystems_table_26.png "TypeSystem Table 26")
+
+为了说明它的使用，我们考虑一个针对布尔的抽象类型。正如前文所述，布尔值可以表示为 $Unit + Unit$ 的类型。现在我们可以展示如何向一个不关心布尔如何实现，但希望利用 $true$、$false$ 和 $cond$ 的客户端隐藏这个表示细节。首先定义一个这样的接口供客户端使用：
+
+$$
+\begin{aligned}
+BoolInterface\quad&\overset{\triangle}{=} \quad \exist Bool.Record(true:Bool, false: Bool, cond: \forall Y.Bool \rightarrow Y \rightarrow Y \rightarrow Y)
+\end{aligned}
+$$
+这个接口声明了存在一个类型 $Bool$（不泄露其身份），它支持适当类型的 $true$、$false$ 和 $cond$ 操作。条件是以其结果类型 $Y$ 为参数的，它可能会根据使用环境而变化。
+
+接下来我们定义这个接口的一个特殊实现：将 $Bool$ 表示为 $Unit + Unit$，并通过 $case$ 语句来实现条件。布尔表示类型和相关的布尔操作将由 $pack$ 构造打包在一起。
+
+$$
+\begin{aligned}
+boolModule: BoolInterface\quad&\overset{\triangle}{\equiv} \\
+pack_{BoolInterface} Bool &= Unit + Unit \\
+with record(& \\
+& true = inLeft(unit), \\
+& false = inRIght(unit), \\
+& cond = \lambda Y. \lambda x:Bool. \lambda y_1: Y. \lambda y_2: Y. \\
+& case_y\ x\ of\ x_1: Unit\ then\ y_1 | x_2: Unit\ then\ y_2)
+\end{aligned}
+$$
+最后，客户端可以通过打开它来使用这个模块，从而获得对布尔类型抽象名称 $Bool$ 的访问，以及对名为 $boolOp$ 的布尔操作的记录的访问。在下一个例子中，这些名字被用于一个返回自然数的简单计算。（下面的计算大体上是, $if\ boolOp.true\ then\ 1\ else\ 0.$）
+
+$$
+\begin{aligned}
+&open_{Nat}\ boolModule\\
+&as Bool, boolOp:Record(true: Bool, false: Bool, cond: \forall Y.Bool \rightarrow Y \rightarrow Y \rightarrow Y) \\
+&in boolOp.cond(Nat)(boolOp.true)(1)(0)
+\end{aligned}
+$$
+
+读者应该验证这些例子是否按照前面给出的规则进行类型检查，请注意 $(Val\ Open)$ 的关键的第三个假设，它意味着结果类型 $B$ 不能包含变量 $X$。该假设禁止将例如 $boolOp.true$ 写成前一个例子中的 $open$ 的主体，因为这样一来，结果类型将是变量 $Bool$。由于第三个假设，表示类型 $(Bool)$ 的抽象名称不能逃出 $open$ 的范围，因此具有该标识类型的值也不能逃出。这种限制是有必要的，否则标识类型可能会被客户知道。
