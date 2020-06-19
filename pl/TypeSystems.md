@@ -438,3 +438,72 @@ $$
 $$
 
 读者应该验证这些例子是否按照前面给出的规则进行类型检查，请注意 $(Val\ Open)$ 的关键的第三个假设，它意味着结果类型 $B$ 不能包含变量 $X$。该假设禁止将例如 $boolOp.true$ 写成前一个例子中的 $open$ 的主体，因为这样一来，结果类型将是变量 $Bool$。由于第三个假设，表示类型 $(Bool)$ 的抽象名称不能逃出 $open$ 的范围，因此具有该标识类型的值也不能逃出。这种限制是有必要的，否则标识类型可能会被客户知道。
+
+# 6. 子类型
+
+类型化的面向对象语言有特别有趣和复杂的类型系统。关于这些语言的特点，目前还没有什么共识（consensus），但至少有一个特点几乎是普遍存在的：子类型化。子类型化抓住了类型之间包含的直观（intutive）概念（notion），类型被看作是值的集合。一个类型的元素也可以被认为是它的任何一个超类型的元素，因此允许一个值（对象）在许多不同的类型环境中被灵活使用。
+
+当考虑一个子类型关系时，例如在面向对象的编程语言中找到的子类型关系，习惯上添加一个判别 $\Gamma\ A  <: B$，说明 $A$ 是 $B$ 的一个子类型（表 27）。直觉是，$A$ 的任何元素都是 $B$ 的元素，或者更恰当的说，$A$ 类型的任何程序也是 $B$ 的程序。
+
+一个最简单的带子类型的类型系统是 $F_1$ 的拓展，称为 $F_{1<:}$。其语法没有变化，只是增加了一个类型 $Top$，它是所有类型的超类心。现有的类型规则也没有变化，子类型判断独立公理化，并增加了一条规则，称为归并（subsumption），用来连接类型判断和子类型判断。
+
+
+![TypeSystem Table 27](./typesystems_table_27.png "TypeSystem Table 27")
+
+归并规则规定，如果一个项具有类型 $A$，而 $A$ 是 $B$ 的子类型，那么这个项也具有 $B$ 类型。也就是说子类型的行为很像集合包含，其类型成员资格被看做是集合成员资格。
+
+表 28 中使用一个最大元素称为 $Top$， 为子类型定义了自反性和传递性，$Top$ 被解释为所有所有良好类型化的项的类型。
+
+函数类型的子类型关系说，如果 $A'$ 是 $A$ 的子类型，$B$ 是 $B'$ 的子类型，那么 $A \rightarrow B$ 是 $A' \rightarrow B'$ 的子类型。请注意，对于函数参数来说，这种包含是倒置的，称之为逆变（contravariant），而对于函数结果来说，它的方向是相同的，称之为协变（covariant）。简单地思维推理可以发现，这是唯一可以满足合理性的规则。类似 $A \rightarrow B$ 的函数 $M$ 接收类型 $A$ 的元素，显然它也接收任何 $A$ 的子类型 $A'$ 的元素，同样的函数 $M$ 返回类型 $B$ 的元素，显然它返回属于 $B$ 的任何超类型 $B'$ 的元素。因此，任何类型 $A \rightarrow B$ 的函数 $M$ ，凭借接受类型 $A'$ 的参数和返回类型 $B'$ 的结果，也具有类型 $A' \rightarrow B'$。后者与说 $A \rightarrow B$ 是$ A' \rightarrow B'$ 的一个子类型是相容的。
+
+一般来说，如果一个类型变量总是出现在奇数箭头的左边，我们就说他在 $F_1$ 的另一个类型中发生了逆变（双重的逆变等于协变）。例如，$X \rightarrow Unit$ 和 $(Unit \rightarrow X) \rightarrow Unit$ 对于 $X$ 是逆变的， $(Unit\rightarrow X)$ 和 $(X \rightarrow Unit) \rightarrow X$ 对于 $X$ 是协变的。
+
+![TypeSystem Table 28](./typesystems_table_28.png "TypeSystem Table 28")
+
+可以在基本类型上添加特设子类型规则，如 $Nat <: Int$ [19]。
+
+我们考虑作为 $F_1$ 拓展的所有结构化类型都接受简单的子类型规则：因此，这些结构也可考虑添加到 $F_{1<:}$ 中（表 29）。通常情况下，我们需要为每个类型构造函数添加一个子类型规则，注意自类型规则与子归纳的结合要合理。乘积和联合的子类型化规则是组件化作用的。记录和变体的子类型规则也可以是按照长度操作的，较长的记录类型是较短的记录类型的子类型（额外的字段可以通过子类型来遗忘），较短的变体类型是较长变体类型的子类型（额外的情况可以通过子类型来引入）。例如：
+
+$$
+\begin{aligned}
+WorkingAge\quad&\overset{\triangle}{=}\quad Variant(student: Unit, adult: Unit) \\
+Age\quad&\overset{\triangle}{=}\quad Variant(child: Unit, student: Unit, adult: Unit, senior: Unit) \\
+Worker\quad&\overset{\triangle}{=}\quad Record(name: String, age: WorkingAge, profession: String) \\
+Person\quad&\overset{\triangle}{=}\quad Record(name: String, age: Age)
+\end{aligned}
+$$
+则有
+
+$$
+\begin{aligned}
+WorkingAge <: Age \\ Worker <: Person
+\end {aligned}
+$$
+
+引用类型没有任何子类型规则：$Ref(A) <: Ref(B)$ 只有在 $A = B$ 时才成立，此时该关系由自反性得出。这个严格的规则是有必要的，因为引用既可以被读取，也可以被写，因此行为既是协变的，也是逆变的。出于同样的援用，数组类型没有额外的子类型规则。
+
+
+![TypeSystem Table 29](./typesystems_table_29.png "TypeSystem Table 29")
+
+与 $F_1$ 的情况一样，在考虑递归类型时，必须改变环境的结构。这一次，必须在环境中添加约束变量（bounded variables），$Top$ 约束对应我们旧的无约束变量。递归类型规则的健全性 $(Sub\ Rec)$ 并不明显，但直觉是相当直接的。要检查 $\mu X.A <: \mu Y.B$，我们假设 $X <: Y$ 并检查 $A <: B$；当我们在 $A$ 和 $B$ 中找到 $X$ 和 $Y$ 的匹配出现时，只要他们是在协变上下文中，这个假设就能帮助我们。一个更简单的规则认为：$\mu X.A <: \mu Y.B$ 只要 $A <: B$ 对于任何 $X$ 来说都是城里的，但是当 $X$ 出现在逆变上下文中时，这个规则是不健全的（例如，紧靠箭头的左边）。
+
+![TypeSystem Table 30](./typesystems_table_30.png "TypeSystem Table 30")
+
+![TypeSystem Table 31](./typesystems_table_31.png "TypeSystem Table 31")
+
+环境中的约束变量也是 $F_2$ 的扩展和子类型化的基础，它给出了一个称之为 $F_{2<:}$ 的系统（表 32）。在该系统中项 $\lambda X<: A:M$ 表示一个程序 $M$ 相对于类型变量 $X$ 进行参数化，该变量类型 $X$ 代表 $A$ 的任意子类型，这是对 $F_2$ 的泛化，因为 $F_2$ 的项 $\lambda X.M$ 可以表示为 $\lambda X<: Top.M.$。对应与项 $\lambda X<: A.M$ 我们有约束类型量词，形如 $\forall X<: A.B$。
+
+![TypeSystem Table 32](./typesystems_table_32.png "TypeSystem Table 32")
+
+$F_{2<:}$ 的类型和项的范围定义和 $F_2$ 相似，只是 $X<:A.B$ 在 $B$ 中结合 $X$，但在 $A$ 中不结合，$\lambda X<:A.M$ 在 $M$ 中结合 $X$，但在 $A$ 中不结合。
+
+$F_{2<:}$ 的类型规则包括 $F_{1<:}$ 的多数类型规则，加上约束变量的规则，以及表 33 中列出的用于约束多态的规则。
+
+![TypeSystem Table 33](./typesystems_table_33.png "TypeSystem Table 33")
+
+
+至于 $F_2$ ,我们不需要在 $F_{2<:}$ 中添加其他类型构造，因为所有常见的类型构造都可以在其中表达（递归除外）。此外，事实证明，用于 $F_2$ 的编码满足预期的子类型规则。例如，可以对约束存在型进行编码，从而描述表 34 中描述的规则。类型 $X <: A.B$ 表示一个部分抽象类型，其表示类型 $X$ 不是完全已知的，但已知是 $A$ 的一个子类型，这种部分抽象在一些基于子类型化的原因中出现（例如，在 `Modula-3` 中）。
+
+![TypeSystem Table 34](./typesystems_table_34.png "TypeSystem Table 34")
+
+要在 $F_{2<:}$ 中获得满足预期的子类型规则的记录和变体类型的编码，还需要做一些非平凡的工作，但是即使是这些也已经发现[6]。
